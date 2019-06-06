@@ -1,0 +1,6 @@
+before_script:
+   - docker info
+
+buikd_image:
+    script:
+        - sleep 1
