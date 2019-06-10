@@ -63,7 +63,8 @@ HGNC_data:
         - curl -sSLN -O ftp://ftp.ebi.ac.uk/pub/databases/genenames/new/tsv/non_alt_loci_set.txt
         - curl -sSLN -O ftp://ftp.ebi.ac.uk/pub/databases/genenames/new/tsv/hgnc_complete_set.txt
     artifacts:
-      paths: "$MOUNT_POINT"/
+        paths:
+            - "$MOUNT_POINT/"
 
 HCOP_data:
     stage: download
@@ -76,7 +77,8 @@ HCOP_data:
         # HCOP_data
         - curl -sSLN -O ftp://ftp.ebi.ac.uk/pub/databases/genenames/hcop/human_mouse_hcop_fifteen_column.txt.gz && gunzip human_mouse_hcop_fifteen_column.txt.gz
     artifacts:
-      paths: "$MOUNT_POINT"/
+        paths:
+             - "$MOUNT_POINT/"
 
 
 build_image:
