@@ -34,8 +34,6 @@ services:
 #
 #before_script:
 #   - docker info
-before_script:
-    - apk add --update curl && rm -rf /var/cache/apk/*
 
 
 stages:
@@ -46,6 +44,8 @@ stages:
 
 HGNC_data:
     stage: download
+    before_script:
+        - apk add --update curl && rm -rf /var/cache/apk/*
     script:
         #
         # The following is a useful command to list the environment variables
@@ -68,14 +68,30 @@ HGNC_data:
 
 HCOP_data:
     stage: download
+    before_script:
+        - apk add --update curl && rm -rf /var/cache/apk/*
     script:
-        
         # Establish a data directory
         - mkdir -p "$MOUNT_POINT"
         - cd "$MOUNT_POINT"
         
         # HCOP_data
         - curl -sSLN -O ftp://ftp.ebi.ac.uk/pub/databases/genenames/hcop/human_mouse_hcop_fifteen_column.txt.gz && gunzip human_mouse_hcop_fifteen_column.txt.gz
+    artifacts:
+        paths:
+             - "$MOUNT_POINT/"
+
+MgiGene_data:
+    stage: download
+    before_script:
+        - apk add --update curl && rm -rf /var/cache/apk/*
+    script:
+        # Establish a data directory
+        - mkdir -p "$MOUNT_POINT"
+        - cd "$MOUNT_POINT"
+        
+        - curl -sSLN -O http://www.informatics.jax.org/downloads/reports/MGI_Gene_Model_Coord.rpt 
+        - sed 's/[[:space:]]*$//' MGI_Gene_Model_Coord.rpt > MGI_Gene_Model_Coord.rpt.tmp && mv MGI_Gene_Model_Coord.rpt.tmp MGI_Gene_Model_Coord.rpt
     artifacts:
         paths:
              - "$MOUNT_POINT/"
@@ -88,7 +104,7 @@ build_image:
         #  - will require additional tests to verify data download
         
         - cd "$CI_PROJECT_DIR"
-        - ls -ls "$MOUNT_POINT"
+        - ls -lsh "$MOUNT_POINT"
     dependencies:
         - HGNC_data
         - HCOP_data
