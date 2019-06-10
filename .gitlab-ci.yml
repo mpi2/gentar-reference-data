@@ -18,6 +18,13 @@ variables:
    # When using dind, it's wise to use the overlayfs driver for
    # improved performance.
    DOCKER_DRIVER: overlay2
+   
+   # Since the docker:dind container and the runner container don’t share their root
+   # filesystem, the job’s working directory can be used as a mount point for children
+   # containers. For example, if you have files you want to share with a child container,
+   # you may create a subdirectory under /builds/$CI_PROJECT_PATH and use it as your
+   # mount point.
+   MOUNT_POINT: /builds/$CI_PROJECT_PATH/mnt
 
 services:
    - docker:dind
@@ -28,4 +35,6 @@ before_script:
 
 build_image:
     script:
+        - mkdir -p "$MOUNT_POINT"
+        - export
         - sleep 1
