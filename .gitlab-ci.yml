@@ -29,23 +29,58 @@ variables:
 services:
    - docker:dind
 
+# Use this command to look at your docker environment
+# Note: Can be overwritten by before_script sections in specific jobs.
+#
+#before_script:
+#   - docker info
 before_script:
-   - docker info
+    - apk add --update curl && rm -rf /var/cache/apk/*
+
 
 stages:
+   - download
    - build
    - test
 
-build_image:
-    stage: build
-    before_script:
-        - apk add --update curl && rm -rf /var/cache/apk/*
+
+HGNC_data:
+    stage: download
     script:
+        #
+        # The following is a useful command to list the environment variables
+        #- export
+        #
+        
+        # Establish a data directory
         - mkdir -p "$MOUNT_POINT"
         - cd "$MOUNT_POINT"
+        
+        # Fetch data files for the service
+        
+        # HGNC_data
         - curl -sSLN -O ftp://ftp.ebi.ac.uk/pub/databases/genenames/new/tsv/alternative_loci_set.txt
+        - curl -sSLN -O ftp://ftp.ebi.ac.uk/pub/databases/genenames/new/tsv/non_alt_loci_set.txt
+        - curl -sSLN -O ftp://ftp.ebi.ac.uk/pub/databases/genenames/new/tsv/hgnc_complete_set.txt
+
+
+HCOP_data:
+    stage: download
+    script:
+        
+        # Establish a data directory
+        - mkdir -p "$MOUNT_POINT"
+        - cd "$MOUNT_POINT"
+        
+        # HCOP_data
+        - curl -sSLN -O ftp://ftp.ebi.ac.uk/pub/databases/genenames/hcop/human_mouse_hcop_fifteen_column.txt.gz && gunzip human_mouse_hcop_fifteen_column.txt.gz
+
+
+build_image:
+    stage: build
+    script:
+        # Check contents
+        #  - will require additional tests to verify data download
+        
         - cd "$CI_PROJECT_DIR"
-        - ls -l "$MOUNT_POINT"
-        # Useful command to list the environment variables
-        #- export
-        - sleep 1
+        - ls -ls "$MOUNT_POINT"
