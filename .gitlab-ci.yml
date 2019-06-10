@@ -32,9 +32,18 @@ services:
 before_script:
    - docker info
 
+stages:
+   - build
+   - test
 
 build_image:
+    stage: build
     script:
         - mkdir -p "$MOUNT_POINT"
-        - export
+        - cd "$MOUNT_POINT"
+        - curl -sSLN -O ftp://ftp.ebi.ac.uk/pub/databases/genenames/new/tsv/alternative_loci_set.txt
+        - cd "$CI_PROJECT_DIR"
+        - ls -l "$MOUNT_POINT"
+        # Useful command to list the environment variables
+        #- export
         - sleep 1
