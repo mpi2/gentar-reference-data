@@ -108,3 +108,4 @@ build_image:
     dependencies:
         - HGNC_data
         - HCOP_data
+        - MgiGene_data
