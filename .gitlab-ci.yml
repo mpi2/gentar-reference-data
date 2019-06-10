@@ -31,7 +31,6 @@ services:
 
 before_script:
    - docker info
-   - apt-get install -y --no-install-recommends curl
 
 stages:
    - build
@@ -40,6 +39,7 @@ stages:
 build_image:
     stage: build
     script:
+        - apt-get install -y --no-install-recommends curl
         - mkdir -p "$MOUNT_POINT"
         - cd "$MOUNT_POINT"
         - curl -sSLN -O ftp://ftp.ebi.ac.uk/pub/databases/genenames/new/tsv/alternative_loci_set.txt
