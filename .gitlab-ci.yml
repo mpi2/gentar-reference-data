@@ -144,6 +144,21 @@ MGI_Strain_data:
              - "$MOUNT_POINT/"
 
 
+MGI_Disease_data:
+    stage: download
+    before_script:
+        - apk add --update curl && rm -rf /var/cache/apk/*
+    script:
+        # Establish a data directory
+        - mkdir -p "$MOUNT_POINT"
+        - cd "$MOUNT_POINT"   
+
+        - curl -sSLN -O http://www.informatics.jax.org/downloads/reports/MGI_DO.rpt
+
+    artifacts:
+        paths:
+             - "$MOUNT_POINT/"
+
 
 build_image:
     stage: build
@@ -159,3 +174,4 @@ build_image:
         - MgiGene_data
         - MGI_Mrk_List2_data
         - MGI_Strain_data
+        - MGI_Disease_data
