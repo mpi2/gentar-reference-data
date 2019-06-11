@@ -38,6 +38,7 @@ services:
 
 stages:
    - download
+   - formatting
    - build
    - test
 
@@ -45,7 +46,7 @@ stages:
 HGNC_data:
     stage: download
     before_script:
-        - apk add --no-cache --virtual --update curl python3 && rm -rf /var/cache/apk/*
+        - apk add --update curl && rm -rf /var/cache/apk/*
     script:
         #
         # The following is a useful command to list the environment variables
@@ -62,10 +63,21 @@ HGNC_data:
         - curl -sSLN -O ftp://ftp.ebi.ac.uk/pub/databases/genenames/new/tsv/alternative_loci_set.txt
         - curl -sSLN -O ftp://ftp.ebi.ac.uk/pub/databases/genenames/new/tsv/non_alt_loci_set.txt
         - curl -sSLN -O ftp://ftp.ebi.ac.uk/pub/databases/genenames/new/tsv/hgnc_complete_set.txt
+    artifacts:
+        paths:
+            - "$MOUNT_POINT/"
 
+
+formatting:HGNC:
+    stage: formatting
+    before_script:
+        - apk add --update python3 && rm -rf /var/cache/apk/*
+    script:
         # Extract the Human gene synonyms - this creates the file HGNC_synonyms.txt
         - python3 "$CI_PROJECT_DIR"/HGNCPreProcessor.py "$MOUNT_POINT"/alternative_loci_set.txt "$MOUNT_POINT"/non_alt_loci_set.txt
 
+    dependencies:
+        - HGNC_data
     artifacts:
         paths:
             - "$MOUNT_POINT/"
@@ -191,7 +203,7 @@ build_image:
         - cd "$CI_PROJECT_DIR"
         - ls -lsh "$MOUNT_POINT"
     dependencies:
-        - HGNC_data
+        - formatting:HGNC
         - HCOP_data
         - MgiGene_data
         - MGI_Mrk_List2_data
