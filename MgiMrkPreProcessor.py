@@ -4,7 +4,7 @@ class MgiMrkPreProcessor:
 
     def __init__(self):
     
-        self.file = sys.argv[0]
+        self.file = sys.argv[1]
         self.pathname = os.path.dirname(self.file)
         self.basename = os.path.basename(self.file)
         self.fullpath = os.path.abspath(os.path.join(self.pathname,self.basename))
