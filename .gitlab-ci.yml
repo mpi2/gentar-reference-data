@@ -86,7 +86,7 @@ HCOP_data:
         paths:
              - "$MOUNT_POINT/"
 
-             
+
 MgiGene_data:
     stage: download
     before_script:
@@ -125,6 +125,22 @@ MGI_Mrk_List2_data:
              - "$MOUNT_POINT/"
 
 
+MGI_Strain_data:
+    stage: download
+    before_script:
+        - apk add --no-cache --virtual --update curl && rm -rf /var/cache/apk/*
+    script:
+        # Establish a data directory
+        - mkdir -p "$MOUNT_POINT"
+        - cd "$MOUNT_POINT"   
+
+        - curl -sSLN -O http://www.informatics.jax.org/downloads/reports/MGI_Strain.rpt && iconv -f ISO-8859-1 -t UTF-8//TRANSLIT MGI_Strain.rpt > MGI_Strain_test.rpt
+
+    artifacts:
+        paths:
+             - "$MOUNT_POINT/"
+
+
 
 build_image:
     stage: build
@@ -139,3 +155,4 @@ build_image:
         - HCOP_data
         - MgiGene_data
         - MGI_Mrk_List2_data
+        - MGI_Strain_data
