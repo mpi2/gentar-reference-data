@@ -96,6 +96,20 @@ MgiGene_data:
         paths:
              - "$MOUNT_POINT/"
 
+MGI_Mrk_List2_data:
+    stage: download
+    before_script:
+        - apk add --no-cache --virtual --update curl python3 && rm -rf /var/cache/apk/*
+    script:
+        # Establish a data directory
+        - mkdir -p "$MOUNT_POINT"
+        - cd "$MOUNT_POINT"
+        
+        - curl -sSLN -O http://www.informatics.jax.org/downloads/reports/MRK_List2.rpt
+        - python3 "$CI_PROJECT_DIR"/MgiMrkPreProcessor.py "$MOUNT_POINT"/MRK_List2.rpt
+    artifacts:
+        paths:
+             - "$MOUNT_POINT/"
 
 build_image:
     stage: build
@@ -109,3 +123,4 @@ build_image:
         - HGNC_data
         - HCOP_data
         - MgiGene_data
+        - MGI_Mrk_List2_data
