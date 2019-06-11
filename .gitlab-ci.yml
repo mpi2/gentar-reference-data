@@ -144,6 +144,28 @@ MGI_Strain_data:
              - "$MOUNT_POINT/"
 
 
+MGI_Allele_data:
+    stage: download
+    before_script:
+        # Install iconv
+        # see: https://gist.github.com/guillemcanal/be3db96d3caa315b4e2b8259cab7d07e
+        - apk add --update curl wget build-base autoconf re2c libtool && mkdir -p /opt && cd /opt && wget http://ftp.gnu.org/pub/gnu/libiconv/libiconv-1.14.tar.gz && tar xzf libiconv-1.14.tar.gz && cd libiconv-1.14 && sed -i 's/_GL_WARN_ON_USE (gets, "gets is a security hole - use fgets instead");/#if HAVE_RAW_DECL_GETS\n_GL_WARN_ON_USE (gets, "gets is a security hole - use fgets instead");\n#endif/g' srclib/stdio.in.h && ./configure --prefix=/usr/local && make && make install && apk del wget build-base autoconf re2c libtool && rm /opt && rm -rf /var/cache/apk/* && rm -rf /usr/share/*
+
+    script:
+        # Establish a data directory
+        - mkdir -p "$MOUNT_POINT"
+        - cd "$MOUNT_POINT"   
+
+        - curl -sSLN -O http://www.informatics.jax.org/downloads/reports/KOMP_Allele.rpt
+        - curl -sSLN -O http://www.informatics.jax.org/downloads/reports/EUCOMM_Allele.rpt
+        - curl -sSLN -O http://www.informatics.jax.org/downloads/reports/NorCOMM_Allele.rpt
+        - curl -sSLN -O http://www.informatics.jax.org/downloads/reports/MGI_PhenotypicAllele.rpt && iconv -f ISO-8859-1 -t UTF-8//TRANSLIT MGI_PhenotypicAllele.rpt > MGI_PhenotypicAllele.rpt.test.txt
+
+    artifacts:
+        paths:
+             - "$MOUNT_POINT/"
+
+
 MGI_Disease_data:
     stage: download
     before_script:
@@ -174,4 +196,5 @@ build_image:
         - MgiGene_data
         - MGI_Mrk_List2_data
         - MGI_Strain_data
+        - MGI_Allele_data
         - MGI_Disease_data
