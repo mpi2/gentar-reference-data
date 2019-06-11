@@ -72,7 +72,7 @@ HGNC_data:
 
          # HCOP_data
         - curl -sSLN -O ftp://ftp.ebi.ac.uk/pub/databases/genenames/hcop/human_mouse_hcop_fifteen_column.txt.gz && gunzip human_mouse_hcop_fifteen_column.txt.gz
-   artifacts:
+    artifacts:
         paths:
             - "$MOUNT_POINT/"
 
