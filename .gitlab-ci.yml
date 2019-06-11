@@ -131,9 +131,6 @@ MGI_Strain_data:
         # Install iconv
         # see: https://gist.github.com/guillemcanal/be3db96d3caa315b4e2b8259cab7d07e
         - apk add --update curl wget build-base autoconf re2c libtool \
-        \
-        # Install GNU libiconv \
-        \
         && mkdir -p /opt \
         && cd /opt \
         && wget http://ftp.gnu.org/pub/gnu/libiconv/libiconv-1.14.tar.gz \
@@ -143,9 +140,6 @@ MGI_Strain_data:
         && ./configure --prefix=/usr/local \
         && make \
         && make install \
-        \     
-        # Cleanup \
-        \
         && apk del wget build-base autoconf re2c libtool \
         && rm /opt \
         && rm -rf /var/cache/apk/* \
