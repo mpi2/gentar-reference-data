@@ -3,16 +3,20 @@ import csv, sys, os
 class HgncPreProcessor:
 
     def __init__(self):
-    
-        self.file = sys.argv[0]
-        self.pathname = os.path.dirname(self.file)
-        self.fullpath = os.path.abspath(self.pathname)
+        
+        # Expects as input the HGNC file 'alternative_loci_set.txt'
+        self.fileA = sys.argv[1]
+        self.pathnameA = os.path.dirname(self.fileA)
+        self.filenameA = os.path.abspath(self.fileA)
+        
+        # Expects as input the HGNC file 'non_alt_loci_set.txt'
+        self.fileB = sys.argv[2]
+        self.filenameB = os.path.abspath(self.fileB)
+
+        # Note the output is placed in the same directory as the HGNC file 'alternative_loci_set.txt'
+        self.outputfilename = os.path.abspath(os.path.join(self.pathnameA,'HGNC_synonyms.txt'))
         
         self.data = []
-        self.filenameA = 'alternative_loci_set.txt'
-        self.filenameB = 'non_alt_loci_set.txt'
-        self.outputfilename = 'HGNC_synonyms.txt'
-        
         self.headings = ['hgnc_id','symbol','name','locus_group','locus_type','status','location','location_sortable','alias_symbol','alias_name','prev_symbol','prev_name','gene_family','gene_family_id','date_approved_reserved','date_symbol_changed','date_name_changed','date_modified','entrez_id','ensembl_gene_id','vega_id','ucsc_id','ena','refseq_accession','ccds_id','uniprot_ids','pubmed_id','mgd_id','rgd_id','lsdb','cosmic','omim_id','mirbase','homeodb','snornabase','bioparadigms_slc','orphanet','pseudogene.org','horde_id','merops','imgt','iuphar','kznf_gene_catalog','mamit-trnadb','cd','lncrnadb','enzyme_id','intermediate_filament_db','rna_central_ids','lncipedia','gtrnadb']
         
         
@@ -66,28 +70,18 @@ class HgncPreProcessor:
                     
                     if id:
                         alias_synonyms = row[8].strip().split('|')
-                        #alias_name = row[9].strip().split('|')
                         
                         for i,syns in enumerate(alias_synonyms):
                             synonym = syns.strip()
                             if synonym:
-                                #if i < len(alias_name):
-                                #    writer.writerow([id,synonym,alias_name[i]])
-                                #else:
-                                #    writer.writerow([id,synonym,''])
                                 writer.writerow([id,synonym])
                                     
                         previous_synonyms = row[10].strip().split('|')
-                        #previous_name = row[11].strip().split('|')
                         
                         
                         for i,syns in enumerate(previous_synonyms):
                             synonym = syns.strip()
                             if synonym:
-                                #if i < len(previous_name):
-                                #    writer.writerow([id,synonym,previous_name[i]])
-                                #else:
-                                #    writer.writerow([id,synonym,''])
                                 writer.writerow([id,synonym])
                                     
             except csv.Error as e:

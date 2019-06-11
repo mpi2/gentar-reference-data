@@ -30,7 +30,7 @@ services:
    - docker:dind
 
 # Use this command to look at your docker environment
-# Note: Can be overwritten by before_script sections in specific jobs.
+# Note: This step can be overwritten by before_script sections in specific jobs.
 #
 #before_script:
 #   - docker info
@@ -45,7 +45,7 @@ stages:
 HGNC_data:
     stage: download
     before_script:
-        - apk add --update curl && rm -rf /var/cache/apk/*
+        - apk add --no-cache --virtual --update curl python3 && rm -rf /var/cache/apk/*
     script:
         #
         # The following is a useful command to list the environment variables
@@ -62,9 +62,14 @@ HGNC_data:
         - curl -sSLN -O ftp://ftp.ebi.ac.uk/pub/databases/genenames/new/tsv/alternative_loci_set.txt
         - curl -sSLN -O ftp://ftp.ebi.ac.uk/pub/databases/genenames/new/tsv/non_alt_loci_set.txt
         - curl -sSLN -O ftp://ftp.ebi.ac.uk/pub/databases/genenames/new/tsv/hgnc_complete_set.txt
+
+        # Extract the Human gene synonyms - this creates the file HGNC_synonyms.txt
+        - python3 "$CI_PROJECT_DIR"/HGNCPreProcessor.py "$MOUNT_POINT"/alternative_loci_set.txt "$MOUNT_POINT"/non_alt_loci_set.txt
+
     artifacts:
         paths:
             - "$MOUNT_POINT/"
+
 
 HCOP_data:
     stage: download
@@ -81,6 +86,7 @@ HCOP_data:
         paths:
              - "$MOUNT_POINT/"
 
+             
 MgiGene_data:
     stage: download
     before_script:
@@ -90,11 +96,15 @@ MgiGene_data:
         - mkdir -p "$MOUNT_POINT"
         - cd "$MOUNT_POINT"
         
-        - curl -sSLN -O http://www.informatics.jax.org/downloads/reports/MGI_Gene_Model_Coord.rpt 
+        - curl -sSLN -O http://www.informatics.jax.org/downloads/reports/MGI_Gene_Model_Coord.rpt
+
+        # Remove the additional tab at the end of the file
         - sed 's/[[:space:]]*$//' MGI_Gene_Model_Coord.rpt > MGI_Gene_Model_Coord.rpt.tmp && mv MGI_Gene_Model_Coord.rpt.tmp MGI_Gene_Model_Coord.rpt
+
     artifacts:
         paths:
              - "$MOUNT_POINT/"
+
 
 MGI_Mrk_List2_data:
     stage: download
@@ -106,12 +116,15 @@ MGI_Mrk_List2_data:
         - cd "$MOUNT_POINT"   
 
         - curl -sSLN -O http://www.informatics.jax.org/downloads/reports/MRK_List2.rpt
-        
+
+        # Extract the mouse gene synonyms - this creates the file Mrk_synonyms.txt
         - python3 "$CI_PROJECT_DIR"/MgiMrkPreProcessor.py "$MOUNT_POINT"/MRK_List2.rpt
 
     artifacts:
         paths:
              - "$MOUNT_POINT/"
+
+
 
 build_image:
     stage: build
