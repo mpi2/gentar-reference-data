@@ -6,20 +6,12 @@ class MgiMrkPreProcessor:
     
         self.file = sys.argv[0]
         self.pathname = os.path.dirname(self.file)
-<<<<<<< HEAD
         self.basename = os.path.basename(self.file)
         self.fullpath = os.path.abspath(os.path.join(self.pathname,self.basename))
         
         self.data = []
         self.filename = self.fullpath
         self.outputfilename = os.path.abspath(os.path.join(self.pathname,'Mrk_synonyms.txt'))
-=======
-        self.fullpath = os.path.abspath(self.pathname)
-        
-        self.data = []
-        self.filename = 'Mrk_List2.rpt'
-        self.outputfilename = 'Mrk_synonyms.txt'
->>>>>>> 270058346999e2d3a396f614d6953c11d8ff4f0c
         
         self.headings = ['MGI Accession ID','Chr','cM Position','genome coordinate start','genome coordinate end','strand','Marker Symbol','Status','Marker Name','Marker Type','Feature Type','Marker Synonyms (pipe-separated)']
         

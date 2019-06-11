@@ -103,15 +103,12 @@ MGI_Mrk_List2_data:
     script:
         # Establish a data directory
         - mkdir -p "$MOUNT_POINT"
-        - cd "$MOUNT_POINT"
-        
+        - cd "$MOUNT_POINT"   
+
         - curl -sSLN -O http://www.informatics.jax.org/downloads/reports/MRK_List2.rpt
-<<<<<<< HEAD
+        
         - python3 "$CI_PROJECT_DIR"/MgiMrkPreProcessor.py "$MOUNT_POINT"/MRK_List2.rpt
-=======
-        - python3 --version
-        - python3 "$CI_PROJECT_DIR"/MgiMrkPreProcessor.py
->>>>>>> 270058346999e2d3a396f614d6953c11d8ff4f0c
+
     artifacts:
         paths:
              - "$MOUNT_POINT/"
