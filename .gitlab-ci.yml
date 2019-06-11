@@ -69,12 +69,16 @@ HGNC_data:
         - curl -sSLN -O ftp://ftp.ebi.ac.uk/pub/databases/genenames/new/tsv/alternative_loci_set.txt
         - curl -sSLN -O ftp://ftp.ebi.ac.uk/pub/databases/genenames/new/tsv/non_alt_loci_set.txt
         - curl -sSLN -O ftp://ftp.ebi.ac.uk/pub/databases/genenames/new/tsv/hgnc_complete_set.txt
-    artifacts:
+
+         # HCOP_data
+        - curl -sSLN -O ftp://ftp.ebi.ac.uk/pub/databases/genenames/hcop/human_mouse_hcop_fifteen_column.txt.gz && gunzip human_mouse_hcop_fifteen_column.txt.gz
+   artifacts:
         paths:
             - "$MOUNT_POINT/"
 
 
-HCOP_data:
+
+MGI_data:
     stage: download
     before_script:
         - apk add --update curl && rm -rf /var/cache/apk/*
@@ -83,94 +87,24 @@ HCOP_data:
         - mkdir -p "$MOUNT_POINT"
         - cd "$MOUNT_POINT"
         
-        # HCOP_data
-        - curl -sSLN -O ftp://ftp.ebi.ac.uk/pub/databases/genenames/hcop/human_mouse_hcop_fifteen_column.txt.gz && gunzip human_mouse_hcop_fifteen_column.txt.gz
-    artifacts:
-        paths:
-             - "$MOUNT_POINT/"
-
-
-MgiGene_data:
-    stage: download
-    before_script:
-        - apk add --update curl && rm -rf /var/cache/apk/*
-    script:
-        # Establish a data directory
-        - mkdir -p "$MOUNT_POINT"
-        - cd "$MOUNT_POINT"
-        
+        # MGI Gene data
         - curl -sSLN -O http://www.informatics.jax.org/downloads/reports/MGI_Gene_Model_Coord.rpt
-
         # Remove the additional tab at the end of the file
         - sed 's/[[:space:]]*$//' MGI_Gene_Model_Coord.rpt > MGI_Gene_Model_Coord.rpt.tmp && mv MGI_Gene_Model_Coord.rpt.tmp MGI_Gene_Model_Coord.rpt
 
-    artifacts:
-        paths:
-             - "$MOUNT_POINT/"
-
-
-
-MGI_Mrk_List2_data:
-    stage: download
-    before_script:
-        - apk add --update curl && rm -rf /var/cache/apk/*
-    script:
-        # Establish a data directory
-        - mkdir -p "$MOUNT_POINT"
-        - cd "$MOUNT_POINT"   
-
+        # MGI_Mrk_List2_data
         - curl -sSLN -O http://www.informatics.jax.org/downloads/reports/MRK_List2.rpt
 
-    artifacts:
-        paths:
-             - "$MOUNT_POINT/"
-
-
-
-MGI_Strain_data:
-    stage: download
-    before_script:
-        - apk add --update curl && rm -rf /var/cache/apk/*
-    script:
-        # Establish a data directory
-        - mkdir -p "$MOUNT_POINT"
-        - cd "$MOUNT_POINT"   
-
+        # MGI_Strain_data
         - curl -sSLN -O http://www.informatics.jax.org/downloads/reports/MGI_Strain.rpt
 
-    artifacts:
-        paths:
-             - "$MOUNT_POINT/"
-
-
-MGI_Allele_data:
-    stage: download
-    before_script:
-        - apk add --update curl && rm -rf /var/cache/apk/*
-    script:
-        # Establish a data directory
-        - mkdir -p "$MOUNT_POINT"
-        - cd "$MOUNT_POINT"   
-
+        # MGI_Allele_data
         - curl -sSLN -O http://www.informatics.jax.org/downloads/reports/KOMP_Allele.rpt
         - curl -sSLN -O http://www.informatics.jax.org/downloads/reports/EUCOMM_Allele.rpt
         - curl -sSLN -O http://www.informatics.jax.org/downloads/reports/NorCOMM_Allele.rpt
         - curl -sSLN -O http://www.informatics.jax.org/downloads/reports/MGI_PhenotypicAllele.rpt
 
-    artifacts:
-        paths:
-             - "$MOUNT_POINT/"
-
-
-MGI_Disease_data:
-    stage: download
-    before_script:
-        - apk add --update curl && rm -rf /var/cache/apk/*
-    script:
-        # Establish a data directory
-        - mkdir -p "$MOUNT_POINT"
-        - cd "$MOUNT_POINT"   
-
+        # MGI_Disease_data
         - curl -sSLN -O http://www.informatics.jax.org/downloads/reports/MGI_DO.rpt
 
     artifacts:
@@ -178,25 +112,26 @@ MGI_Disease_data:
              - "$MOUNT_POINT/"
 
 
+
 #
 # Data formatting stage
 #
 
 
-synonym-formatting:
+Synonym-formatting:
     stage: formatting
     before_script:
         - apk add --update python3 && rm -rf /var/cache/apk/*
     script:
         # Extract the Human gene synonyms - this creates the file HGNC_synonyms.txt
-        - python3 "$CI_PROJECT_DIR"/HGNCPreProcessor.py "$MOUNT_POINT"/alternative_loci_set.txt "$MOUNT_POINT"/non_alt_loci_set.txt
+        - python3 "$CI_PROJECT_DIR"/scripts/HGNCPreProcessor.py "$MOUNT_POINT"/alternative_loci_set.txt "$MOUNT_POINT"/non_alt_loci_set.txt
 
         # Extract the mouse gene synonyms - this creates the file Mrk_synonyms.txt
-        - python3 "$CI_PROJECT_DIR"/MgiMrkPreProcessor.py "$MOUNT_POINT"/MRK_List2.rpt
+        - python3 "$CI_PROJECT_DIR"/scripts/MgiMrkPreProcessor.py "$MOUNT_POINT"/MRK_List2.rpt
 
     dependencies:
         - HGNC_data
-        - MGI_Mrk_List2_data
+        - MGI_data
     artifacts:
         paths:
             - "$MOUNT_POINT/"
@@ -214,8 +149,7 @@ MGI-formatting:
         - iconv -f ISO-8859-1 -t UTF-8//TRANSLIT "$MOUNT_POINT"/MGI_Strain.rpt > "$MOUNT_POINT"/MGI_Strain_test.rpt
 
     dependencies:
-        - MGI_Allele_data
-        - MGI_Strain_data
+        - MGI_data
     artifacts:
         paths:
              - "$MOUNT_POINT/"
@@ -232,8 +166,5 @@ build_image:
         - cd "$CI_PROJECT_DIR"
         - ls -lsh "$MOUNT_POINT"
     dependencies:
-        - HCOP_data
-        - MgiGene_data
-        - MGI_Disease_data
-        - synonym-formatting
+        - Synonym-formatting
         - MGI-formatting
