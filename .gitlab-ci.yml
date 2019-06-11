@@ -128,7 +128,29 @@ MGI_Mrk_List2_data:
 MGI_Strain_data:
     stage: download
     before_script:
-        - apk add --no-cache --virtual --update curl && rm -rf /var/cache/apk/*
+        # Install iconv
+        # see: https://gist.github.com/guillemcanal/be3db96d3caa315b4e2b8259cab7d07e
+        - apk add --update curl wget build-base autoconf re2c libtool \
+        \
+        # Install GNU libiconv \
+        \
+        && mkdir -p /opt \
+        && cd /opt \
+        && wget http://ftp.gnu.org/pub/gnu/libiconv/libiconv-1.14.tar.gz \
+        && tar xzf libiconv-1.14.tar.gz \
+        && cd libiconv-1.14 \
+        && sed -i 's/_GL_WARN_ON_USE (gets, "gets is a security hole - use fgets instead");/#if HAVE_RAW_DECL_GETS\n_GL_WARN_ON_USE (gets, "gets is a security hole - use fgets instead");\n#endif/g' srclib/stdio.in.h \
+        && ./configure --prefix=/usr/local \
+        && make \
+        && make install \
+        \     
+        # Cleanup \
+        \
+        && apk del wget build-base autoconf re2c libtool \
+        && rm /opt \
+        && rm -rf /var/cache/apk/* \
+        && rm -rf /usr/share/*
+
     script:
         # Establish a data directory
         - mkdir -p "$MOUNT_POINT"
