@@ -177,6 +177,6 @@ build_image:
     stage: build
     script:
         - docker build -t reference-db .
-        - docker run -it --name reference-database -v "$MOUNT_POINT:/mnt" reference-db
+        - docker run -v "$MOUNT_POINT:/mnt" reference-db
     dependencies:
         - check_data
