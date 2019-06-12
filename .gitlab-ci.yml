@@ -176,8 +176,8 @@ check_data:
 build_image:
     stage: build
     script:
-        - docker build -t reference-db .
-        - docker run --name refdb-container -v "$MOUNT_POINT:/mnt" reference-db
+        - docker build --build-arg MOUNT_POINT="$MOUNT_POINT" -t reference-db .
+        - docker run --name refdb-container reference-db
         - docker commit refdb-container "$CI_REGISTRY_IMAGE"/database:"$CI_JOB_ID"
         - docker push "$CI_REGISTRY_IMAGE"/database:"$CI_JOB_ID"
     dependencies:
