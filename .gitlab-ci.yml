@@ -177,6 +177,8 @@ build_image:
     stage: build
     script:
         - docker build -t reference-db .
-        - docker run -v "$MOUNT_POINT:/mnt" reference-db
+        - docker run --name refdb-container -v "$MOUNT_POINT:/mnt" reference-db
+        - docker commit refdb-container "$CI_REGISTRY_IMAGE"/database:"$CI_JOB_ID"
+        - docker push "$CI_REGISTRY_IMAGE"/database:"$CI_JOB_ID"
     dependencies:
         - check_data
