@@ -181,11 +181,12 @@ build_image:
     #    - docker login -u "${CI_REGISTRY_USER}" -p "${CI_REGISTRY_PASSWORD}" ${CI_REGISTRY}
     script:
         - mkdir -p data
-        - cat "$MOUNT_POINT"/check_data_job_id.txt
         - export LAST_JOB_ID=$(cat "$MOUNT_POINT"/check_data_job_id.txt)
-        - echo ${LAST_JOB_ID}
         - cd data
         - curl -sSLN -O ${CI_PROJECT_URL}/-/jobs/${LAST_JOB_ID}/artifacts/download/artifacts.zip
+        - unzip artifacts.zip
+        - rm artifacts.zip
+        - rm check_data_job_id.txt
         - cd "$CI_PROJECT_DIR"
         - ls -lsh data
         - exit
