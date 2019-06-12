@@ -39,6 +39,7 @@ services:
 stages:
    - download
    - formatting
+   - validate
    - build
    - test
 
@@ -157,8 +158,8 @@ MGI-formatting:
 
 
 
-build_image:
-    stage: build
+check_data:
+    stage: validate
     script:
         # Check contents
         #  - will require additional tests to verify data download
@@ -168,3 +169,14 @@ build_image:
     dependencies:
         - Synonym-formatting
         - MGI-formatting
+    artifacts:
+        paths:
+             - "$MOUNT_POINT/"
+
+build_image:
+    stage: build
+    script:
+        - docker build -t reference-db .
+        - docker run -it --name reference-database -v "$MOUNT_POINT:/mnt" reference-db
+    dependencies:
+        - check_data
