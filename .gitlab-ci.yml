@@ -166,7 +166,7 @@ check_data:
         
         - cd "$CI_PROJECT_DIR"
         - ls -lsh "$MOUNT_POINT"
-        - echo "${CI_JOB_ID}" > "$MOUNT_POINT"/check_data_job_id.txt
+        # - echo "${CI_JOB_ID}" > "$MOUNT_POINT"/check_data_job_id.txt
     dependencies:
         - Synonym-formatting
         - MGI-formatting
@@ -177,26 +177,29 @@ check_data:
 build_image:
     stage: build
     before_script:
-        - apk add --update curl && rm -rf /var/cache/apk/*
+    #    - apk add --update curl && rm -rf /var/cache/apk/*
     #    - docker login -u "${CI_REGISTRY_USER}" -p "${CI_REGISTRY_PASSWORD}" ${CI_REGISTRY}
     script:
-        - mkdir -p data
-        - export LAST_JOB_ID=$(cat "$MOUNT_POINT"/check_data_job_id.txt)
-        - cd data
-        - curl -sSLN -O ${CI_PROJECT_URL}/-/jobs/${LAST_JOB_ID}/artifacts/download/artifacts.zip
-        - unzip artifacts.zip
-        - rm artifacts.zip
-        - rm check_data_job_id.txt
-        - cd "$CI_PROJECT_DIR"
-        - ls -lsh data
-        - exit
-        #- cp  data/
-        - ls -lsh data
+        # - mkdir -p data
+        # - export LAST_JOB_ID=$(cat "$MOUNT_POINT"/check_data_job_id.txt)
+        # - cd data
+        # - curl -sSLN -O ${CI_PROJECT_URL}/-/jobs/${LAST_JOB_ID}/artifacts/download/artifacts.zip
+        # - unzip artifacts.zip
+        # - rm artifacts.zip
+        # - rm check_data_job_id.txt
+        # - cd "$CI_PROJECT_DIR"
+        # - ls -lsh data
+        # - exit
+        # - cp  data/
+        # - ls -lsh data
         - docker build -t reference-db .  | tee ${MOUNT_POINT}/build.log
-        - docker run --name refdb-container reference-db
+        # - docker run --name refdb-container reference-db
+        - docker run --name refdb-container -v "$MOUNT_POINT:/mnt" -d reference-db
         # Time is required to load the data
-        - sleep 300
-        - docker commit refdb-container "${CI_REGISTRY_IMAGE}"/database:"${CI_JOB_ID}"
+        - sleep 600
+        - export NOW=$(date '+%Y-%m-%d %H:%M:%S')
+        - docker commit refdb-container "${CI_REGISTRY_IMAGE}"/database:"${NOW}"
+        - exit
         - docker push "${CI_REGISTRY_IMAGE}"/database:"${CI_JOB_ID}"  | tee ${MOUNT_POINT}/push.log
         - docker logout
     dependencies:
