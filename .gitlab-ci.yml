@@ -176,8 +176,10 @@ check_data:
 build_image:
     stage: build
     script:
-        - docker build --build-arg CI_PROJECT_PATH="$CI_PROJECT_PATH" -t reference-db .
-        - docker run --name refdb-container reference-db
+        - docker build -t reference-db .
+        - docker run --name refdb-container -d reference-db
+        - docker ps
+        - sleep 60
         - docker commit refdb-container "$CI_REGISTRY_IMAGE"/database:"$CI_JOB_ID"
         - docker push "$CI_REGISTRY_IMAGE"/database:"$CI_JOB_ID"
     dependencies:
