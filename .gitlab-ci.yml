@@ -38,7 +38,8 @@ services:
 
 stages:
    - download
-   - formatting
+   - synonym-formatting
+   - mgi-formatting
    - validate
    - build
    - test
@@ -120,7 +121,7 @@ MGI_data:
 
 
 Synonym-formatting:
-    stage: formatting
+    stage: synonym-formatting
     before_script:
         - apk add --update python3 && rm -rf /var/cache/apk/*
     script:
@@ -139,7 +140,7 @@ Synonym-formatting:
 
 
 MGI-formatting:
-    stage: formatting
+    stage: mgi-formatting
     before_script:
         # Install iconv
         # see: https://gist.github.com/guillemcanal/be3db96d3caa315b4e2b8259cab7d07e
@@ -150,7 +151,7 @@ MGI-formatting:
         - iconv -f ISO-8859-1 -t UTF-8//TRANSLIT "$MOUNT_POINT"/MGI_Strain.rpt > "$MOUNT_POINT"/MGI_Strain_test.rpt
 
     dependencies:
-        - MGI_data
+        - Synonym-formatting
     artifacts:
         paths:
              - "$MOUNT_POINT/"
@@ -168,7 +169,6 @@ check_data:
         - ls -lsh "$MOUNT_POINT"
         # - echo "${CI_JOB_ID}" > "$MOUNT_POINT"/check_data_job_id.txt
     dependencies:
-        - Synonym-formatting
         - MGI-formatting
     artifacts:
         paths:
