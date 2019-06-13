@@ -194,13 +194,14 @@ build_image:
         # - ls -lsh data
         - docker build -t reference-db .  | tee ${MOUNT_POINT}/build.log
         # - docker run --name refdb-container reference-db
-        - docker run --name refdb-container -v "$MOUNT_POINT:/mnt" -d reference-db
+        - docker run --name refdbcontainer -v "$MOUNT_POINT:/mnt" -d reference-db
         # Time is required to load the data
         - sleep 600
-        - export NOW=$(date '+%Y-%m-%d %H:%M:%S')
-        - docker commit refdb-container "${CI_REGISTRY_IMAGE}"/database:"${NOW}"
+        - export NOW=$(date '+%Y-%m-%d-%H-%M-%S')
+        - echo "${CI_REGISTRY_IMAGE}"/database:"${NOW}"
+        - docker commit refdbcontainer "${CI_REGISTRY_IMAGE}"/database:"${NOW}"
         - exit
-        - docker push "${CI_REGISTRY_IMAGE}"/database:"${CI_JOB_ID}"  | tee ${MOUNT_POINT}/push.log
+        - docker push "${CI_REGISTRY_IMAGE}"/database:"${NOW}"  | tee ${MOUNT_POINT}/push.log
         - docker logout
     dependencies:
         - check_data
