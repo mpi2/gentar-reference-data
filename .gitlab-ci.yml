@@ -195,14 +195,24 @@ build_image:
         - docker build -t reference-db .  | tee ${MOUNT_POINT}/build.log
         # - docker run --name refdb-container reference-db
         - docker run --name refdbcontainer -v "$MOUNT_POINT:/mnt" -d reference-db
+
         # Time is required to load the data
+        #
+        # This is potential problem as the time taken to complete the data load cannot be established
+        # Hence the long pause period. 
+        #
+        # An alternative would be to copy the data required into to the image
+        # when it is built, but this is not trivial in this build system, and a downside  would be
+        # that every time the container starts there would always be a lag while the data was loaded.
+        #
         - sleep 600
+
         - export NOW=$(date '+%Y-%m-%d-%H-%M-%S')
-        - echo "${CI_REGISTRY_IMAGE}"/database:"${NOW}"
-        - docker commit refdbcontainer "${CI_REGISTRY_IMAGE}"/database:"${NOW}"
-        - exit
-        - docker push "${CI_REGISTRY_IMAGE}"/database:"${NOW}"  | tee ${MOUNT_POINT}/push.log
-        - docker logout
+        - echo "${CI_REGISTRY_IMAGE}":"${NOW}"
+        - docker commit refdbcontainer "${CI_REGISTRY_IMAGE}":"${NOW}"
+        #- exit
+        - docker push "${CI_REGISTRY_IMAGE}":"${NOW}"  | tee ${MOUNT_POINT}/push.log
+        #- docker logout
     dependencies:
         - check_data
     artifacts:
