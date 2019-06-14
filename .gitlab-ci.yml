@@ -25,6 +25,11 @@ variables:
    # you may create a subdirectory under /builds/$CI_PROJECT_PATH and use it as your
    # mount point.
    MOUNT_POINT: /builds/$CI_PROJECT_PATH/mnt
+   
+   # For EBI you need to override the definition of CI_REGISTRY to remove the port number
+   CI_REGISTRY: dockerhub.ebi.ac.uk
+   CI_REGISTRY_IMAGE: $CI_REGISTRY/$CI_PROJECT_PATH
+
 
 services:
    - docker:dind
@@ -183,6 +188,7 @@ build_image:
         # - mkdir -p data
         # - export LAST_JOB_ID=$(cat "$MOUNT_POINT"/check_data_job_id.txt)
         # - cd data
+        # THIS does not work - instead finish with download in the URL and add login credentials
         # - curl -sSLN -O ${CI_PROJECT_URL}/-/jobs/${LAST_JOB_ID}/artifacts/download/artifacts.zip
         # - unzip artifacts.zip
         # - rm artifacts.zip
