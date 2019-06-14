@@ -213,7 +213,7 @@ build_image:
         # when it is built, but this is not trivial in this build system, and a downside  would be
         # that every time the container starts there would always be a lag while the data was loaded.
         #
-        - sleep 300
+        - sleep 600
 
         - export NOW=$(date '+%Y-%m-%d-%H-%M-%S')
         - echo "${CI_REGISTRY_IMAGE}":"${NOW}"
@@ -223,7 +223,7 @@ build_image:
         - docker tag "${CI_REGISTRY_IMAGE}":"${NOW}" "${CI_REGISTRY_IMAGE}":latest
         - docker push "${CI_REGISTRY_IMAGE}":latest  | tee ${MOUNT_POINT}/push-latest.log
 
-        - docker logout
+        - docker logout ${CI_REGISTRY}
 
     dependencies:
         - check_data
