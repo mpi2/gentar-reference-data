@@ -227,9 +227,12 @@ build_image:
 
         # PUSH THE IMAGE TO DOCKERHUB
         - docker login -u "${DOCKER_HUB_USER}" -p "${DOCKER_HUB_PWD}"
+ 
+        - docker tag "${CI_REGISTRY_IMAGE}":"${NOW}" "${DOCKER_HUB_USER}"/"${DOCKER_HUB_REPO}":"${NOW}"
+        - docker push "${DOCKER_HUB_USER}"/"${DOCKER_HUB_REPO}":"${NOW}"  | tee ${MOUNT_POINT}/dockerhub-push.log   
 
-        - docker tag "${CI_REGISTRY_IMAGE}":"${NOW}" "${DOCKER_HUB_REPO}":latest
-        - docker push "${DOCKER_HUB_REPO}":latest  | tee ${MOUNT_POINT}/dockerhub-push-latest.log
+        - docker tag "${CI_REGISTRY_IMAGE}":"${NOW}" "${DOCKER_HUB_USER}"/"${DOCKER_HUB_REPO}":latest
+        - docker push "${DOCKER_HUB_USER}"/"${DOCKER_HUB_REPO}":latest  | tee ${MOUNT_POINT}/dockerhub-push-latest.log
 
         - docker logout       
 
