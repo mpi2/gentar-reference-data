@@ -20,49 +20,7 @@ SET default_tablespace = '';
 
 SET default_with_oids = false;
 
-
--- We will create a separate user and grant permissions on hasura-specific
--- schemas and information_schema and pg_catalog
--- These permissions/grants are required for Hasura to work properly.
-
--- create a separate user for hasura
-CREATE USER hasurauser WITH PASSWORD 'hasurauser';
-
--- create pgcrypto extension, required for UUID
-CREATE EXTENSION IF NOT EXISTS pgcrypto;
-
--- create the schemas required by the hasura system
--- NOTE: If you are starting from scratch: drop the below schemas first, if they exist.
-CREATE SCHEMA IF NOT EXISTS hdb_catalog;
-CREATE SCHEMA IF NOT EXISTS hdb_views;
-
--- make the user an owner of system schemas
-ALTER SCHEMA hdb_catalog OWNER TO hasurauser;
-ALTER SCHEMA hdb_views OWNER TO hasurauser;
-
--- grant select permissions on information_schema and pg_catalog. This is
--- required for hasura to query list of available tables
-GRANT SELECT ON ALL TABLES IN SCHEMA information_schema TO hasurauser;
-GRANT SELECT ON ALL TABLES IN SCHEMA pg_catalog TO hasurauser;
-
--- Below permissions are optional. This is dependent on what access to your
--- tables/schemas - you want give to hasura. If you want expose the public
--- schema for GraphQL query then give permissions on public schema to the
--- hasura user.
--- Be careful to use these in your production db. Consult the postgres manual or
--- your DBA and give appropriate permissions.
-
--- grant all privileges on all tables in the public schema. This can be customised:
--- For example, if you only want to use GraphQL regular queries and not mutations,
--- then you can set: GRANT SELECT ON ALL TABLES...
-GRANT SELECT ON ALL TABLES IN SCHEMA public TO hasurauser;
-GRANT SELECT ON ALL SEQUENCES IN SCHEMA public TO hasurauser;
-
--- Similarly add this for other schemas, if you have any.
--- GRANT USAGE ON SCHEMA <schema-name> TO hasurauser;
--- GRANT ALL ON ALL TABLES IN SCHEMA <schema-name> TO hasurauser;
--- GRANT ALL ON ALL SEQUENCES IN SCHEMA <schema-name> TO hasurauser;
-
+GRANT ALL ON schema public TO ref_admin;
 
 --
 -- Name: hgnc_gene; Type: TABLE; Schema: public; Owner: ref_admin
@@ -1219,3 +1177,106 @@ ALTER TABLE ONLY public.ortholog
 
 ALTER TABLE ONLY public.ortholog
     ADD CONSTRAINT fktgaxn9urr6pxq4spqllt8b36y FOREIGN KEY (human_gene_id) REFERENCES public.human_gene(id);
+
+
+
+-- 
+-- Schema Search PATH
+-- 
+
+-- 
+-- Need to specify the schema search path
+-- The default is:
+-- "$user", public
+-- However this is causing an issue when specifying the SQL in the docker container.
+
+
+SET search_path TO public;
+
+-- 
+-- TRIGGERS
+-- 
+
+CREATE OR REPLACE FUNCTION ortholog_category()
+  RETURNS trigger AS
+$$
+BEGIN
+IF NEW.support_count>=9 THEN
+NEW.CATEGORY = 'GOOD';
+ELSEIF  NEW.support_count>=5 AND NEW.support_count<9 THEN
+NEW.CATEGORY = 'MODERATE';
+ELSEIF NEW.support_count>=0 AND NEW.support_count<5 THEN
+NEW.CATEGORY = 'LOW';
+ELSE
+NEW.CATEGORY = '';
+END IF;
+RETURN NEW;
+END;
+$$
+LANGUAGE 'plpgsql';
+
+
+ALTER FUNCTION ortholog_category OWNER TO ref_admin;
+
+
+
+CREATE TRIGGER ortholog_insert_trigger
+    BEFORE INSERT ON "ortholog"
+    FOR EACH ROW 
+    EXECUTE PROCEDURE ortholog_category();
+
+
+CREATE TRIGGER ortholog_update_trigger
+    BEFORE UPDATE ON "ortholog"
+    FOR EACH ROW 
+    EXECUTE PROCEDURE ortholog_category();
+
+
+
+-- 
+-- Hasura user - Note only select granted on tables - i.e. read-only
+-- 
+
+
+-- We will create a separate user and grant permissions on hasura-specific
+-- schemas and information_schema and pg_catalog
+-- These permissions/grants are required for Hasura to work properly.
+
+-- create a separate user for hasura
+CREATE USER hasurauser WITH PASSWORD 'hasurauser';
+
+-- create pgcrypto extension, required for UUID
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
+-- create the schemas required by the hasura system
+-- NOTE: If you are starting from scratch: drop the below schemas first, if they exist.
+CREATE SCHEMA IF NOT EXISTS hdb_catalog;
+CREATE SCHEMA IF NOT EXISTS hdb_views;
+
+-- make the user an owner of system schemas
+ALTER SCHEMA hdb_catalog OWNER TO hasurauser;
+ALTER SCHEMA hdb_views OWNER TO hasurauser;
+
+-- grant select permissions on information_schema and pg_catalog. This is
+-- required for hasura to query list of available tables
+GRANT SELECT ON ALL TABLES IN SCHEMA information_schema TO hasurauser;
+GRANT SELECT ON ALL TABLES IN SCHEMA pg_catalog TO hasurauser;
+
+-- Below permissions are optional. This is dependent on what access to your
+-- tables/schemas - you want give to hasura. If you want expose the public
+-- schema for GraphQL query then give permissions on public schema to the
+-- hasura user.
+-- Be careful to use these in your production db. Consult the postgres manual or
+-- your DBA and give appropriate permissions.
+
+-- grant all privileges on all tables in the public schema. This can be customised:
+-- For example, if you only want to use GraphQL regular queries and not mutations,
+-- then you can set: GRANT SELECT ON ALL TABLES...
+GRANT SELECT ON ALL TABLES IN SCHEMA public TO hasurauser;
+GRANT SELECT ON ALL SEQUENCES IN SCHEMA public TO hasurauser;
+
+-- Similarly add this for other schemas, if you have any.
+-- GRANT USAGE ON SCHEMA <schema-name> TO hasurauser;
+-- GRANT ALL ON ALL TABLES IN SCHEMA <schema-name> TO hasurauser;
+-- GRANT ALL ON ALL SEQUENCES IN SCHEMA <schema-name> TO hasurauser;
+
