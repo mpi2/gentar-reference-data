@@ -21,11 +21,6 @@ SET default_tablespace = '';
 SET default_with_oids = false;
 
 
-CREATE DATABASE refdata;
-REVOKE CONNECT ON DATABASE refdata FROM PUBLIC;
-CREATE USER ref_admin WITH PASSWORD 'ref_admin';
-GRANT ALL PRIVILEGES ON DATABASE refdata TO ref_admin;
-
 -- We will create a separate user and grant permissions on hasura-specific
 -- schemas and information_schema and pg_catalog
 -- These permissions/grants are required for Hasura to work properly.
@@ -778,6 +773,7 @@ ALTER SEQUENCE public.omim_table_id_seq OWNED BY public.omim_table.id;
 CREATE TABLE public.ortholog (
     support character varying(255) NOT NULL,
     support_count bigint NOT NULL,
+    category character varying(255),
     human_gene_id bigint NOT NULL,
     mouse_gene_id bigint NOT NULL
 );
