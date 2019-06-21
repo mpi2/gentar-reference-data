@@ -20,8 +20,57 @@ SET default_tablespace = '';
 
 SET default_with_oids = false;
 
+
+CREATE DATABASE refdata;
+REVOKE CONNECT ON DATABASE refdata FROM PUBLIC;
+CREATE USER ref_admin WITH PASSWORD 'ref_admin';
+GRANT ALL PRIVILEGES ON DATABASE refdata TO ref_admin;
+
+-- We will create a separate user and grant permissions on hasura-specific
+-- schemas and information_schema and pg_catalog
+-- These permissions/grants are required for Hasura to work properly.
+
+-- create a separate user for hasura
+CREATE USER hasurauser WITH PASSWORD 'hasurauser';
+
+-- create pgcrypto extension, required for UUID
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
+-- create the schemas required by the hasura system
+-- NOTE: If you are starting from scratch: drop the below schemas first, if they exist.
+CREATE SCHEMA IF NOT EXISTS hdb_catalog;
+CREATE SCHEMA IF NOT EXISTS hdb_views;
+
+-- make the user an owner of system schemas
+ALTER SCHEMA hdb_catalog OWNER TO hasurauser;
+ALTER SCHEMA hdb_views OWNER TO hasurauser;
+
+-- grant select permissions on information_schema and pg_catalog. This is
+-- required for hasura to query list of available tables
+GRANT SELECT ON ALL TABLES IN SCHEMA information_schema TO hasurauser;
+GRANT SELECT ON ALL TABLES IN SCHEMA pg_catalog TO hasurauser;
+
+-- Below permissions are optional. This is dependent on what access to your
+-- tables/schemas - you want give to hasura. If you want expose the public
+-- schema for GraphQL query then give permissions on public schema to the
+-- hasura user.
+-- Be careful to use these in your production db. Consult the postgres manual or
+-- your DBA and give appropriate permissions.
+
+-- grant all privileges on all tables in the public schema. This can be customised:
+-- For example, if you only want to use GraphQL regular queries and not mutations,
+-- then you can set: GRANT SELECT ON ALL TABLES...
+GRANT SELECT ON ALL TABLES IN SCHEMA public TO hasurauser;
+GRANT SELECT ON ALL SEQUENCES IN SCHEMA public TO hasurauser;
+
+-- Similarly add this for other schemas, if you have any.
+-- GRANT USAGE ON SCHEMA <schema-name> TO hasurauser;
+-- GRANT ALL ON ALL TABLES IN SCHEMA <schema-name> TO hasurauser;
+-- GRANT ALL ON ALL SEQUENCES IN SCHEMA <schema-name> TO hasurauser;
+
+
 --
--- Name: hgnc_gene; Type: TABLE; Schema: public; Owner: ref_admin
+-- Name: hgnc_gene; Type: TABLE; Schema: public; Owner: tp_admin
 --
 
 CREATE TABLE public.hgnc_gene (
@@ -80,10 +129,10 @@ CREATE TABLE public.hgnc_gene (
 );
 
 
-ALTER TABLE public.hgnc_gene OWNER TO ref_admin;
+ALTER TABLE public.hgnc_gene OWNER TO tp_admin;
 
 --
--- Name: hgnc_gene_id_seq; Type: SEQUENCE; Schema: public; Owner: ref_admin
+-- Name: hgnc_gene_id_seq; Type: SEQUENCE; Schema: public; Owner: tp_admin
 --
 
 CREATE SEQUENCE public.hgnc_gene_id_seq
@@ -94,16 +143,16 @@ CREATE SEQUENCE public.hgnc_gene_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.hgnc_gene_id_seq OWNER TO ref_admin;
+ALTER TABLE public.hgnc_gene_id_seq OWNER TO tp_admin;
 
 --
--- Name: hgnc_gene_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: ref_admin
+-- Name: hgnc_gene_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: tp_admin
 --
 
 ALTER SEQUENCE public.hgnc_gene_id_seq OWNED BY public.hgnc_gene.id;
 
 --
--- Name: hcop; Type: TABLE; Schema: public; Owner: ref_admin
+-- Name: hcop; Type: TABLE; Schema: public; Owner: tp_admin
 --
 
 CREATE TABLE public.hcop (
@@ -126,10 +175,10 @@ CREATE TABLE public.hcop (
 );
 
 
-ALTER TABLE public.hcop OWNER TO ref_admin;
+ALTER TABLE public.hcop OWNER TO tp_admin;
 
 --
--- Name: hcop_id_seq; Type: SEQUENCE; Schema: public; Owner: ref_admin
+-- Name: hcop_id_seq; Type: SEQUENCE; Schema: public; Owner: tp_admin
 --
 
 CREATE SEQUENCE public.hcop_id_seq
@@ -140,16 +189,16 @@ CREATE SEQUENCE public.hcop_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.hcop_id_seq OWNER TO ref_admin;
+ALTER TABLE public.hcop_id_seq OWNER TO tp_admin;
 
 --
--- Name: hcop_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: ref_admin
+-- Name: hcop_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: tp_admin
 --
 
 ALTER SEQUENCE public.hcop_id_seq OWNED BY public.hcop.id;
 
 --
--- Name: mgi_allele; Type: TABLE; Schema: public; Owner: ref_admin
+-- Name: mgi_allele; Type: TABLE; Schema: public; Owner: tp_admin
 --
 
 CREATE TABLE public.mgi_allele (
@@ -165,10 +214,10 @@ CREATE TABLE public.mgi_allele (
 );
 
 
-ALTER TABLE public.mgi_allele OWNER TO ref_admin;
+ALTER TABLE public.mgi_allele OWNER TO tp_admin;
 
 --
--- Name: mgi_allele_id_seq; Type: SEQUENCE; Schema: public; Owner: ref_admin
+-- Name: mgi_allele_id_seq; Type: SEQUENCE; Schema: public; Owner: tp_admin
 --
 
 CREATE SEQUENCE public.mgi_allele_id_seq
@@ -179,17 +228,17 @@ CREATE SEQUENCE public.mgi_allele_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.mgi_allele_id_seq OWNER TO ref_admin;
+ALTER TABLE public.mgi_allele_id_seq OWNER TO tp_admin;
 
 --
--- Name: mgi_allele_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: ref_admin
+-- Name: mgi_allele_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: tp_admin
 --
 
 ALTER SEQUENCE public.mgi_allele_id_seq OWNED BY public.mgi_allele.id;
 
 
 --
--- Name: mgi_disease; Type: TABLE; Schema: public; Owner: ref_admin
+-- Name: mgi_disease; Type: TABLE; Schema: public; Owner: tp_admin
 --
 
 CREATE TABLE public.mgi_disease (
@@ -206,10 +255,10 @@ CREATE TABLE public.mgi_disease (
 );
 
 
-ALTER TABLE public.mgi_disease OWNER TO ref_admin;
+ALTER TABLE public.mgi_disease OWNER TO tp_admin;
 
 --
--- Name: mgi_disease_id_seq; Type: SEQUENCE; Schema: public; Owner: ref_admin
+-- Name: mgi_disease_id_seq; Type: SEQUENCE; Schema: public; Owner: tp_admin
 --
 
 CREATE SEQUENCE public.mgi_disease_id_seq
@@ -220,17 +269,17 @@ CREATE SEQUENCE public.mgi_disease_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.mgi_disease_id_seq OWNER TO ref_admin;
+ALTER TABLE public.mgi_disease_id_seq OWNER TO tp_admin;
 
 --
--- Name: mgi_disease_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: ref_admin
+-- Name: mgi_disease_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: tp_admin
 --
 
 ALTER SEQUENCE public.mgi_disease_id_seq OWNED BY public.mgi_disease.id;
 
 
 --
--- Name: mgi_gene; Type: TABLE; Schema: public; Owner: ref_admin
+-- Name: mgi_gene; Type: TABLE; Schema: public; Owner: tp_admin
 --
 
 CREATE TABLE public.mgi_gene (
@@ -253,10 +302,10 @@ CREATE TABLE public.mgi_gene (
 );
 
 
-ALTER TABLE public.mgi_gene OWNER TO ref_admin;
+ALTER TABLE public.mgi_gene OWNER TO tp_admin;
 
 --
--- Name: mgi_gene_id_seq; Type: SEQUENCE; Schema: public; Owner: ref_admin
+-- Name: mgi_gene_id_seq; Type: SEQUENCE; Schema: public; Owner: tp_admin
 --
 
 CREATE SEQUENCE public.mgi_gene_id_seq
@@ -267,17 +316,17 @@ CREATE SEQUENCE public.mgi_gene_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.mgi_gene_id_seq OWNER TO ref_admin;
+ALTER TABLE public.mgi_gene_id_seq OWNER TO tp_admin;
 
 --
--- Name: mgi_gene_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: ref_admin
+-- Name: mgi_gene_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: tp_admin
 --
 
 ALTER SEQUENCE public.mgi_gene_id_seq OWNED BY public.mgi_gene.id;
 
 
 --
--- Name: mgi_mrk_list2; Type: TABLE; Schema: public; Owner: ref_admin
+-- Name: mgi_mrk_list2; Type: TABLE; Schema: public; Owner: tp_admin
 --
 
 CREATE TABLE public.mgi_mrk_list2 (
@@ -297,10 +346,10 @@ CREATE TABLE public.mgi_mrk_list2 (
 );
 
 
-ALTER TABLE public.mgi_mrk_list2 OWNER TO ref_admin;
+ALTER TABLE public.mgi_mrk_list2 OWNER TO tp_admin;
 
 --
--- Name: mgi_mrk_list2_id_seq; Type: SEQUENCE; Schema: public; Owner: ref_admin
+-- Name: mgi_mrk_list2_id_seq; Type: SEQUENCE; Schema: public; Owner: tp_admin
 --
 
 CREATE SEQUENCE public.mgi_mrk_list2_id_seq
@@ -311,17 +360,17 @@ CREATE SEQUENCE public.mgi_mrk_list2_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.mgi_mrk_list2_id_seq OWNER TO ref_admin;
+ALTER TABLE public.mgi_mrk_list2_id_seq OWNER TO tp_admin;
 
 --
--- Name: mgi_mrk_list2_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: ref_admin
+-- Name: mgi_mrk_list2_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: tp_admin
 --
 
 ALTER SEQUENCE public.mgi_mrk_list2_id_seq OWNED BY public.mgi_mrk_list2.id;
 
 
 --
--- Name: mgi_phenotypic_allele; Type: TABLE; Schema: public; Owner: ref_admin
+-- Name: mgi_phenotypic_allele; Type: TABLE; Schema: public; Owner: tp_admin
 --
 
 CREATE TABLE public.mgi_phenotypic_allele (
@@ -342,10 +391,10 @@ CREATE TABLE public.mgi_phenotypic_allele (
 );
 
 
-ALTER TABLE public.mgi_phenotypic_allele OWNER TO ref_admin;
+ALTER TABLE public.mgi_phenotypic_allele OWNER TO tp_admin;
 
 --
--- Name: mgi_phenotypic_allele_id_seq; Type: SEQUENCE; Schema: public; Owner: ref_admin
+-- Name: mgi_phenotypic_allele_id_seq; Type: SEQUENCE; Schema: public; Owner: tp_admin
 --
 
 CREATE SEQUENCE public.mgi_phenotypic_allele_id_seq
@@ -356,17 +405,17 @@ CREATE SEQUENCE public.mgi_phenotypic_allele_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.mgi_phenotypic_allele_id_seq OWNER TO ref_admin;
+ALTER TABLE public.mgi_phenotypic_allele_id_seq OWNER TO tp_admin;
 
 --
--- Name: mgi_phenotypic_allele_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: ref_admin
+-- Name: mgi_phenotypic_allele_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: tp_admin
 --
 
 ALTER SEQUENCE public.mgi_phenotypic_allele_id_seq OWNED BY public.mgi_phenotypic_allele.id;
 
 
 --
--- Name: mouse_allele; Type: TABLE; Schema: public; Owner: ref_admin
+-- Name: mouse_allele; Type: TABLE; Schema: public; Owner: tp_admin
 --
 
 CREATE TABLE public.mouse_allele (
@@ -381,10 +430,10 @@ CREATE TABLE public.mouse_allele (
 );
 
 
-ALTER TABLE public.mouse_allele OWNER TO ref_admin;
+ALTER TABLE public.mouse_allele OWNER TO tp_admin;
 
 --
--- Name: mouse_allele_id_seq; Type: SEQUENCE; Schema: public; Owner: ref_admin
+-- Name: mouse_allele_id_seq; Type: SEQUENCE; Schema: public; Owner: tp_admin
 --
 
 CREATE SEQUENCE public.mouse_allele_id_seq
@@ -395,17 +444,17 @@ CREATE SEQUENCE public.mouse_allele_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.mouse_allele_id_seq OWNER TO ref_admin;
+ALTER TABLE public.mouse_allele_id_seq OWNER TO tp_admin;
 
 --
--- Name: mouse_allele_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: ref_admin
+-- Name: mouse_allele_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: tp_admin
 --
 
 ALTER SEQUENCE public.mouse_allele_id_seq OWNED BY public.mouse_allele.id;
 
 
 --
--- Name: mouse_gene; Type: TABLE; Schema: public; Owner: ref_admin
+-- Name: mouse_gene; Type: TABLE; Schema: public; Owner: tp_admin
 --
 
 CREATE TABLE public.mouse_gene (
@@ -432,10 +481,10 @@ CREATE TABLE public.mouse_gene (
 );
 
 
-ALTER TABLE public.mouse_gene OWNER TO ref_admin;
+ALTER TABLE public.mouse_gene OWNER TO tp_admin;
 
 --
--- Name: mouse_gene_allele; Type: TABLE; Schema: public; Owner: ref_admin
+-- Name: mouse_gene_allele; Type: TABLE; Schema: public; Owner: tp_admin
 --
 
 CREATE TABLE public.mouse_gene_allele (
@@ -444,10 +493,10 @@ CREATE TABLE public.mouse_gene_allele (
 );
 
 
-ALTER TABLE public.mouse_gene_allele OWNER TO ref_admin;
+ALTER TABLE public.mouse_gene_allele OWNER TO tp_admin;
 
 --
--- Name: mouse_gene_id_seq; Type: SEQUENCE; Schema: public; Owner: ref_admin
+-- Name: mouse_gene_id_seq; Type: SEQUENCE; Schema: public; Owner: tp_admin
 --
 
 CREATE SEQUENCE public.mouse_gene_id_seq
@@ -458,17 +507,17 @@ CREATE SEQUENCE public.mouse_gene_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.mouse_gene_id_seq OWNER TO ref_admin;
+ALTER TABLE public.mouse_gene_id_seq OWNER TO tp_admin;
 
 --
--- Name: mouse_gene_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: ref_admin
+-- Name: mouse_gene_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: tp_admin
 --
 
 ALTER SEQUENCE public.mouse_gene_id_seq OWNED BY public.mouse_gene.id;
 
 
 --
--- Name: mouse_gene_synonym; Type: TABLE; Schema: public; Owner: ref_admin
+-- Name: mouse_gene_synonym; Type: TABLE; Schema: public; Owner: tp_admin
 --
 
 CREATE TABLE public.mouse_gene_synonym (
@@ -482,10 +531,10 @@ CREATE TABLE public.mouse_gene_synonym (
 );
 
 
-ALTER TABLE public.mouse_gene_synonym OWNER TO ref_admin;
+ALTER TABLE public.mouse_gene_synonym OWNER TO tp_admin;
 
 --
--- Name: mouse_gene_synonym_id_seq; Type: SEQUENCE; Schema: public; Owner: ref_admin
+-- Name: mouse_gene_synonym_id_seq; Type: SEQUENCE; Schema: public; Owner: tp_admin
 --
 
 CREATE SEQUENCE public.mouse_gene_synonym_id_seq
@@ -496,17 +545,17 @@ CREATE SEQUENCE public.mouse_gene_synonym_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.mouse_gene_synonym_id_seq OWNER TO ref_admin;
+ALTER TABLE public.mouse_gene_synonym_id_seq OWNER TO tp_admin;
 
 --
--- Name: mouse_gene_synonym_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: ref_admin
+-- Name: mouse_gene_synonym_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: tp_admin
 --
 
 ALTER SEQUENCE public.mouse_gene_synonym_id_seq OWNED BY public.mouse_gene_synonym.id;
 
 
 --
--- Name: mouse_gene_synonym_relation; Type: TABLE; Schema: public; Owner: ref_admin
+-- Name: mouse_gene_synonym_relation; Type: TABLE; Schema: public; Owner: tp_admin
 --
 
 CREATE TABLE public.mouse_gene_synonym_relation (
@@ -515,10 +564,10 @@ CREATE TABLE public.mouse_gene_synonym_relation (
 );
 
 
-ALTER TABLE public.mouse_gene_synonym_relation OWNER TO ref_admin;
+ALTER TABLE public.mouse_gene_synonym_relation OWNER TO tp_admin;
 
 --
--- Name: human_disease; Type: TABLE; Schema: public; Owner: ref_admin
+-- Name: human_disease; Type: TABLE; Schema: public; Owner: tp_admin
 --
 
 CREATE TABLE public.human_disease (
@@ -528,10 +577,10 @@ CREATE TABLE public.human_disease (
 );
 
 
-ALTER TABLE public.human_disease OWNER TO ref_admin;
+ALTER TABLE public.human_disease OWNER TO tp_admin;
 
 --
--- Name: human_disease_id_seq; Type: SEQUENCE; Schema: public; Owner: ref_admin
+-- Name: human_disease_id_seq; Type: SEQUENCE; Schema: public; Owner: tp_admin
 --
 
 CREATE SEQUENCE public.human_disease_id_seq
@@ -542,17 +591,17 @@ CREATE SEQUENCE public.human_disease_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.human_disease_id_seq OWNER TO ref_admin;
+ALTER TABLE public.human_disease_id_seq OWNER TO tp_admin;
 
 --
--- Name: human_disease_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: ref_admin
+-- Name: human_disease_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: tp_admin
 --
 
 ALTER SEQUENCE public.human_disease_id_seq OWNED BY public.human_disease.id;
 
 
 --
--- Name: human_disease_omim; Type: TABLE; Schema: public; Owner: ref_admin
+-- Name: human_disease_omim; Type: TABLE; Schema: public; Owner: tp_admin
 --
 
 CREATE TABLE public.human_disease_omim (
@@ -561,10 +610,10 @@ CREATE TABLE public.human_disease_omim (
 );
 
 
-ALTER TABLE public.human_disease_omim OWNER TO ref_admin;
+ALTER TABLE public.human_disease_omim OWNER TO tp_admin;
 
 --
--- Name: human_gene; Type: TABLE; Schema: public; Owner: ref_admin
+-- Name: human_gene; Type: TABLE; Schema: public; Owner: tp_admin
 --
 
 CREATE TABLE public.human_gene (
@@ -579,10 +628,10 @@ CREATE TABLE public.human_gene (
 );
 
 
-ALTER TABLE public.human_gene OWNER TO ref_admin;
+ALTER TABLE public.human_gene OWNER TO tp_admin;
 
 --
--- Name: human_gene_disease; Type: TABLE; Schema: public; Owner: ref_admin
+-- Name: human_gene_disease; Type: TABLE; Schema: public; Owner: tp_admin
 --
 
 CREATE TABLE public.human_gene_disease (
@@ -595,10 +644,10 @@ CREATE TABLE public.human_gene_disease (
 );
 
 
-ALTER TABLE public.human_gene_disease OWNER TO ref_admin;
+ALTER TABLE public.human_gene_disease OWNER TO tp_admin;
 
 --
--- Name: human_gene_disease_id_seq; Type: SEQUENCE; Schema: public; Owner: ref_admin
+-- Name: human_gene_disease_id_seq; Type: SEQUENCE; Schema: public; Owner: tp_admin
 --
 
 CREATE SEQUENCE public.human_gene_disease_id_seq
@@ -609,17 +658,17 @@ CREATE SEQUENCE public.human_gene_disease_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.human_gene_disease_id_seq OWNER TO ref_admin;
+ALTER TABLE public.human_gene_disease_id_seq OWNER TO tp_admin;
 
 --
--- Name: human_gene_disease_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: ref_admin
+-- Name: human_gene_disease_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: tp_admin
 --
 
 ALTER SEQUENCE public.human_gene_disease_id_seq OWNED BY public.human_gene_disease.id;
 
 
 --
--- Name: human_gene_id_seq; Type: SEQUENCE; Schema: public; Owner: ref_admin
+-- Name: human_gene_id_seq; Type: SEQUENCE; Schema: public; Owner: tp_admin
 --
 
 CREATE SEQUENCE public.human_gene_id_seq
@@ -630,17 +679,17 @@ CREATE SEQUENCE public.human_gene_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.human_gene_id_seq OWNER TO ref_admin;
+ALTER TABLE public.human_gene_id_seq OWNER TO tp_admin;
 
 --
--- Name: human_gene_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: ref_admin
+-- Name: human_gene_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: tp_admin
 --
 
 ALTER SEQUENCE public.human_gene_id_seq OWNED BY public.human_gene.id;
 
 
 --
--- Name: human_gene_synonym; Type: TABLE; Schema: public; Owner: ref_admin
+-- Name: human_gene_synonym; Type: TABLE; Schema: public; Owner: tp_admin
 --
 
 CREATE TABLE public.human_gene_synonym (
@@ -654,10 +703,10 @@ CREATE TABLE public.human_gene_synonym (
 );
 
 
-ALTER TABLE public.human_gene_synonym OWNER TO ref_admin;
+ALTER TABLE public.human_gene_synonym OWNER TO tp_admin;
 
 --
--- Name: human_gene_synonym_id_seq; Type: SEQUENCE; Schema: public; Owner: ref_admin
+-- Name: human_gene_synonym_id_seq; Type: SEQUENCE; Schema: public; Owner: tp_admin
 --
 
 CREATE SEQUENCE public.human_gene_synonym_id_seq
@@ -668,17 +717,17 @@ CREATE SEQUENCE public.human_gene_synonym_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.human_gene_synonym_id_seq OWNER TO ref_admin;
+ALTER TABLE public.human_gene_synonym_id_seq OWNER TO tp_admin;
 
 --
--- Name: human_gene_synonym_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: ref_admin
+-- Name: human_gene_synonym_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: tp_admin
 --
 
 ALTER SEQUENCE public.human_gene_synonym_id_seq OWNED BY public.human_gene_synonym.id;
 
 
 --
--- Name: human_gene_synonym_rel; Type: TABLE; Schema: public; Owner: ref_admin
+-- Name: human_gene_synonym_rel; Type: TABLE; Schema: public; Owner: tp_admin
 --
 
 CREATE TABLE public.human_gene_synonym_rel (
@@ -687,10 +736,10 @@ CREATE TABLE public.human_gene_synonym_rel (
 );
 
 
-ALTER TABLE public.human_gene_synonym_rel OWNER TO ref_admin;
+ALTER TABLE public.human_gene_synonym_rel OWNER TO tp_admin;
 
 --
--- Name: omim_table; Type: TABLE; Schema: public; Owner: ref_admin
+-- Name: omim_table; Type: TABLE; Schema: public; Owner: tp_admin
 --
 
 CREATE TABLE public.omim_table (
@@ -699,10 +748,10 @@ CREATE TABLE public.omim_table (
 );
 
 
-ALTER TABLE public.omim_table OWNER TO ref_admin;
+ALTER TABLE public.omim_table OWNER TO tp_admin;
 
 --
--- Name: omim_table_id_seq; Type: SEQUENCE; Schema: public; Owner: ref_admin
+-- Name: omim_table_id_seq; Type: SEQUENCE; Schema: public; Owner: tp_admin
 --
 
 CREATE SEQUENCE public.omim_table_id_seq
@@ -713,17 +762,17 @@ CREATE SEQUENCE public.omim_table_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.omim_table_id_seq OWNER TO ref_admin;
+ALTER TABLE public.omim_table_id_seq OWNER TO tp_admin;
 
 --
--- Name: omim_table_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: ref_admin
+-- Name: omim_table_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: tp_admin
 --
 
 ALTER SEQUENCE public.omim_table_id_seq OWNED BY public.omim_table.id;
 
 
 --
--- Name: ortholog; Type: TABLE; Schema: public; Owner: ref_admin
+-- Name: ortholog; Type: TABLE; Schema: public; Owner: tp_admin
 --
 
 CREATE TABLE public.ortholog (
@@ -734,10 +783,10 @@ CREATE TABLE public.ortholog (
 );
 
 
-ALTER TABLE public.ortholog OWNER TO ref_admin;
+ALTER TABLE public.ortholog OWNER TO tp_admin;
 
 --
--- Name: strain; Type: TABLE; Schema: public; Owner: ref_admin
+-- Name: strain; Type: TABLE; Schema: public; Owner: tp_admin
 --
 
 CREATE TABLE public.strain (
@@ -752,10 +801,10 @@ CREATE TABLE public.strain (
 );
 
 
-ALTER TABLE public.strain OWNER TO ref_admin;
+ALTER TABLE public.strain OWNER TO tp_admin;
 
 --
--- Name: strain_id_seq; Type: SEQUENCE; Schema: public; Owner: ref_admin
+-- Name: strain_id_seq; Type: SEQUENCE; Schema: public; Owner: tp_admin
 --
 
 CREATE SEQUENCE public.strain_id_seq
@@ -766,10 +815,10 @@ CREATE SEQUENCE public.strain_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.strain_id_seq OWNER TO ref_admin;
+ALTER TABLE public.strain_id_seq OWNER TO tp_admin;
 
 --
--- Name: strain_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: ref_admin
+-- Name: strain_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: tp_admin
 --
 
 ALTER SEQUENCE public.strain_id_seq OWNED BY public.strain.id;
@@ -782,111 +831,111 @@ ALTER SEQUENCE public.strain_id_seq OWNED BY public.strain.id;
 
 
 --
--- Name: hcop id; Type: DEFAULT; Schema: public; Owner: ref_admin
+-- Name: hcop id; Type: DEFAULT; Schema: public; Owner: tp_admin
 --
 
 ALTER TABLE ONLY public.hcop ALTER COLUMN id SET DEFAULT nextval('public.hcop_id_seq'::regclass);
 
 
 --
--- Name: hgnc_gene id; Type: DEFAULT; Schema: public; Owner: ref_admin
+-- Name: hgnc_gene id; Type: DEFAULT; Schema: public; Owner: tp_admin
 --
 
 ALTER TABLE ONLY public.hgnc_gene ALTER COLUMN id SET DEFAULT nextval('public.hgnc_gene_id_seq'::regclass);
 
 
 --
--- Name: human_disease id; Type: DEFAULT; Schema: public; Owner: ref_admin
+-- Name: human_disease id; Type: DEFAULT; Schema: public; Owner: tp_admin
 --
 
 ALTER TABLE ONLY public.human_disease ALTER COLUMN id SET DEFAULT nextval('public.human_disease_id_seq'::regclass);
 
 
 --
--- Name: human_gene id; Type: DEFAULT; Schema: public; Owner: ref_admin
+-- Name: human_gene id; Type: DEFAULT; Schema: public; Owner: tp_admin
 --
 
 ALTER TABLE ONLY public.human_gene ALTER COLUMN id SET DEFAULT nextval('public.human_gene_id_seq'::regclass);
 
 
 --
--- Name: human_gene_disease id; Type: DEFAULT; Schema: public; Owner: ref_admin
+-- Name: human_gene_disease id; Type: DEFAULT; Schema: public; Owner: tp_admin
 --
 
 ALTER TABLE ONLY public.human_gene_disease ALTER COLUMN id SET DEFAULT nextval('public.human_gene_disease_id_seq'::regclass);
 
 
 --
--- Name: human_gene_synonym id; Type: DEFAULT; Schema: public; Owner: ref_admin
+-- Name: human_gene_synonym id; Type: DEFAULT; Schema: public; Owner: tp_admin
 --
 
 ALTER TABLE ONLY public.human_gene_synonym ALTER COLUMN id SET DEFAULT nextval('public.human_gene_synonym_id_seq'::regclass);
 
 
 --
--- Name: mgi_allele id; Type: DEFAULT; Schema: public; Owner: ref_admin
+-- Name: mgi_allele id; Type: DEFAULT; Schema: public; Owner: tp_admin
 --
 
 ALTER TABLE ONLY public.mgi_allele ALTER COLUMN id SET DEFAULT nextval('public.mgi_allele_id_seq'::regclass);
 
 
 --
--- Name: mgi_disease id; Type: DEFAULT; Schema: public; Owner: ref_admin
+-- Name: mgi_disease id; Type: DEFAULT; Schema: public; Owner: tp_admin
 --
 
 ALTER TABLE ONLY public.mgi_disease ALTER COLUMN id SET DEFAULT nextval('public.mgi_disease_id_seq'::regclass);
 
 
 --
--- Name: mgi_gene id; Type: DEFAULT; Schema: public; Owner: ref_admin
+-- Name: mgi_gene id; Type: DEFAULT; Schema: public; Owner: tp_admin
 --
 
 ALTER TABLE ONLY public.mgi_gene ALTER COLUMN id SET DEFAULT nextval('public.mgi_gene_id_seq'::regclass);
 
 
 --
--- Name: mgi_mrk_list2 id; Type: DEFAULT; Schema: public; Owner: ref_admin
+-- Name: mgi_mrk_list2 id; Type: DEFAULT; Schema: public; Owner: tp_admin
 --
 
 ALTER TABLE ONLY public.mgi_mrk_list2 ALTER COLUMN id SET DEFAULT nextval('public.mgi_mrk_list2_id_seq'::regclass);
 
 
 --
--- Name: mgi_phenotypic_allele id; Type: DEFAULT; Schema: public; Owner: ref_admin
+-- Name: mgi_phenotypic_allele id; Type: DEFAULT; Schema: public; Owner: tp_admin
 --
 
 ALTER TABLE ONLY public.mgi_phenotypic_allele ALTER COLUMN id SET DEFAULT nextval('public.mgi_phenotypic_allele_id_seq'::regclass);
 
 
 --
--- Name: mouse_allele id; Type: DEFAULT; Schema: public; Owner: ref_admin
+-- Name: mouse_allele id; Type: DEFAULT; Schema: public; Owner: tp_admin
 --
 
 ALTER TABLE ONLY public.mouse_allele ALTER COLUMN id SET DEFAULT nextval('public.mouse_allele_id_seq'::regclass);
 
 
 --
--- Name: mouse_gene id; Type: DEFAULT; Schema: public; Owner: ref_admin
+-- Name: mouse_gene id; Type: DEFAULT; Schema: public; Owner: tp_admin
 --
 
 ALTER TABLE ONLY public.mouse_gene ALTER COLUMN id SET DEFAULT nextval('public.mouse_gene_id_seq'::regclass);
 
 
 --
--- Name: mouse_gene_synonym id; Type: DEFAULT; Schema: public; Owner: ref_admin
+-- Name: mouse_gene_synonym id; Type: DEFAULT; Schema: public; Owner: tp_admin
 --
 
 ALTER TABLE ONLY public.mouse_gene_synonym ALTER COLUMN id SET DEFAULT nextval('public.mouse_gene_synonym_id_seq'::regclass);
 
 
 --
--- Name: omim_table id; Type: DEFAULT; Schema: public; Owner: ref_admin
+-- Name: omim_table id; Type: DEFAULT; Schema: public; Owner: tp_admin
 --
 
 ALTER TABLE ONLY public.omim_table ALTER COLUMN id SET DEFAULT nextval('public.omim_table_id_seq'::regclass);
 
 --
--- Name: strain id; Type: DEFAULT; Schema: public; Owner: ref_admin
+-- Name: strain id; Type: DEFAULT; Schema: public; Owner: tp_admin
 --
 
 ALTER TABLE ONLY public.strain ALTER COLUMN id SET DEFAULT nextval('public.strain_id_seq'::regclass);
@@ -898,7 +947,7 @@ ALTER TABLE ONLY public.strain ALTER COLUMN id SET DEFAULT nextval('public.strai
 
 
 --
--- Name: hcop hcop_pkey; Type: CONSTRAINT; Schema: public; Owner: ref_admin
+-- Name: hcop hcop_pkey; Type: CONSTRAINT; Schema: public; Owner: tp_admin
 --
 
 ALTER TABLE ONLY public.hcop
@@ -906,7 +955,7 @@ ALTER TABLE ONLY public.hcop
 
 
 --
--- Name: hgnc_gene hgnc_gene_pkey; Type: CONSTRAINT; Schema: public; Owner: ref_admin
+-- Name: hgnc_gene hgnc_gene_pkey; Type: CONSTRAINT; Schema: public; Owner: tp_admin
 --
 
 ALTER TABLE ONLY public.hgnc_gene
@@ -914,7 +963,7 @@ ALTER TABLE ONLY public.hgnc_gene
 
 
 --
--- Name: human_disease_omim human_disease_omim_pkey; Type: CONSTRAINT; Schema: public; Owner: ref_admin
+-- Name: human_disease_omim human_disease_omim_pkey; Type: CONSTRAINT; Schema: public; Owner: tp_admin
 --
 
 ALTER TABLE ONLY public.human_disease_omim
@@ -922,7 +971,7 @@ ALTER TABLE ONLY public.human_disease_omim
 
 
 --
--- Name: human_disease human_disease_pkey; Type: CONSTRAINT; Schema: public; Owner: ref_admin
+-- Name: human_disease human_disease_pkey; Type: CONSTRAINT; Schema: public; Owner: tp_admin
 --
 
 ALTER TABLE ONLY public.human_disease
@@ -930,7 +979,7 @@ ALTER TABLE ONLY public.human_disease
 
 
 --
--- Name: human_gene_disease human_gene_disease_pkey; Type: CONSTRAINT; Schema: public; Owner: ref_admin
+-- Name: human_gene_disease human_gene_disease_pkey; Type: CONSTRAINT; Schema: public; Owner: tp_admin
 --
 
 ALTER TABLE ONLY public.human_gene_disease
@@ -938,7 +987,7 @@ ALTER TABLE ONLY public.human_gene_disease
 
 
 --
--- Name: human_gene human_gene_pkey; Type: CONSTRAINT; Schema: public; Owner: ref_admin
+-- Name: human_gene human_gene_pkey; Type: CONSTRAINT; Schema: public; Owner: tp_admin
 --
 
 ALTER TABLE ONLY public.human_gene
@@ -946,7 +995,7 @@ ALTER TABLE ONLY public.human_gene
 
 
 --
--- Name: human_gene_synonym human_gene_synonym_pkey; Type: CONSTRAINT; Schema: public; Owner: ref_admin
+-- Name: human_gene_synonym human_gene_synonym_pkey; Type: CONSTRAINT; Schema: public; Owner: tp_admin
 --
 
 ALTER TABLE ONLY public.human_gene_synonym
@@ -954,7 +1003,7 @@ ALTER TABLE ONLY public.human_gene_synonym
 
 
 --
--- Name: human_gene_synonym_rel human_gene_synonym_rel_pkey; Type: CONSTRAINT; Schema: public; Owner: ref_admin
+-- Name: human_gene_synonym_rel human_gene_synonym_rel_pkey; Type: CONSTRAINT; Schema: public; Owner: tp_admin
 --
 
 ALTER TABLE ONLY public.human_gene_synonym_rel
@@ -963,7 +1012,7 @@ ALTER TABLE ONLY public.human_gene_synonym_rel
 
 
 --
--- Name: mgi_allele mgi_allele_pkey; Type: CONSTRAINT; Schema: public; Owner: ref_admin
+-- Name: mgi_allele mgi_allele_pkey; Type: CONSTRAINT; Schema: public; Owner: tp_admin
 --
 
 ALTER TABLE ONLY public.mgi_allele
@@ -971,7 +1020,7 @@ ALTER TABLE ONLY public.mgi_allele
 
 
 --
--- Name: mgi_disease mgi_disease_pkey; Type: CONSTRAINT; Schema: public; Owner: ref_admin
+-- Name: mgi_disease mgi_disease_pkey; Type: CONSTRAINT; Schema: public; Owner: tp_admin
 --
 
 ALTER TABLE ONLY public.mgi_disease
@@ -979,7 +1028,7 @@ ALTER TABLE ONLY public.mgi_disease
 
 
 --
--- Name: mgi_gene mgi_gene_pkey; Type: CONSTRAINT; Schema: public; Owner: ref_admin
+-- Name: mgi_gene mgi_gene_pkey; Type: CONSTRAINT; Schema: public; Owner: tp_admin
 --
 
 ALTER TABLE ONLY public.mgi_gene
@@ -987,7 +1036,7 @@ ALTER TABLE ONLY public.mgi_gene
 
 
 --
--- Name: mgi_mrk_list2 mgi_mrk_list2_pkey; Type: CONSTRAINT; Schema: public; Owner: ref_admin
+-- Name: mgi_mrk_list2 mgi_mrk_list2_pkey; Type: CONSTRAINT; Schema: public; Owner: tp_admin
 --
 
 ALTER TABLE ONLY public.mgi_mrk_list2
@@ -995,7 +1044,7 @@ ALTER TABLE ONLY public.mgi_mrk_list2
 
 
 --
--- Name: mgi_phenotypic_allele mgi_phenotypic_allele_pkey; Type: CONSTRAINT; Schema: public; Owner: ref_admin
+-- Name: mgi_phenotypic_allele mgi_phenotypic_allele_pkey; Type: CONSTRAINT; Schema: public; Owner: tp_admin
 --
 
 ALTER TABLE ONLY public.mgi_phenotypic_allele
@@ -1003,7 +1052,7 @@ ALTER TABLE ONLY public.mgi_phenotypic_allele
 
 
 --
--- Name: mouse_allele mouse_allele_pkey; Type: CONSTRAINT; Schema: public; Owner: ref_admin
+-- Name: mouse_allele mouse_allele_pkey; Type: CONSTRAINT; Schema: public; Owner: tp_admin
 --
 
 ALTER TABLE ONLY public.mouse_allele
@@ -1012,7 +1061,7 @@ ALTER TABLE ONLY public.mouse_allele
 
 
 --
--- Name: mouse_gene_allele mouse_gene_allele_pkey; Type: CONSTRAINT; Schema: public; Owner: ref_admin
+-- Name: mouse_gene_allele mouse_gene_allele_pkey; Type: CONSTRAINT; Schema: public; Owner: tp_admin
 --
 
 ALTER TABLE ONLY public.mouse_gene_allele
@@ -1020,7 +1069,7 @@ ALTER TABLE ONLY public.mouse_gene_allele
 
 
 --
--- Name: mouse_gene mouse_gene_pkey; Type: CONSTRAINT; Schema: public; Owner: ref_admin
+-- Name: mouse_gene mouse_gene_pkey; Type: CONSTRAINT; Schema: public; Owner: tp_admin
 --
 
 ALTER TABLE ONLY public.mouse_gene
@@ -1028,7 +1077,7 @@ ALTER TABLE ONLY public.mouse_gene
 
 
 --
--- Name: mouse_gene_synonym mouse_gene_synonym_pkey; Type: CONSTRAINT; Schema: public; Owner: ref_admin
+-- Name: mouse_gene_synonym mouse_gene_synonym_pkey; Type: CONSTRAINT; Schema: public; Owner: tp_admin
 --
 
 ALTER TABLE ONLY public.mouse_gene_synonym
@@ -1036,7 +1085,7 @@ ALTER TABLE ONLY public.mouse_gene_synonym
 
 
 --
--- Name: mouse_gene_synonym_relation mouse_gene_synonym_relation_pkey; Type: CONSTRAINT; Schema: public; Owner: ref_admin
+-- Name: mouse_gene_synonym_relation mouse_gene_synonym_relation_pkey; Type: CONSTRAINT; Schema: public; Owner: tp_admin
 --
 
 ALTER TABLE ONLY public.mouse_gene_synonym_relation
@@ -1044,7 +1093,7 @@ ALTER TABLE ONLY public.mouse_gene_synonym_relation
 
 
 --
--- Name: omim_table omim_table_pkey; Type: CONSTRAINT; Schema: public; Owner: ref_admin
+-- Name: omim_table omim_table_pkey; Type: CONSTRAINT; Schema: public; Owner: tp_admin
 --
 
 ALTER TABLE ONLY public.omim_table
@@ -1052,7 +1101,7 @@ ALTER TABLE ONLY public.omim_table
 
 
 --
--- Name: ortholog ortholog_pkey; Type: CONSTRAINT; Schema: public; Owner: ref_admin
+-- Name: ortholog ortholog_pkey; Type: CONSTRAINT; Schema: public; Owner: tp_admin
 --
 
 ALTER TABLE ONLY public.ortholog
@@ -1061,7 +1110,7 @@ ALTER TABLE ONLY public.ortholog
 
 
 --
--- Name: strain strain_pkey; Type: CONSTRAINT; Schema: public; Owner: ref_admin
+-- Name: strain strain_pkey; Type: CONSTRAINT; Schema: public; Owner: tp_admin
 --
 
 ALTER TABLE ONLY public.strain
@@ -1070,7 +1119,7 @@ ALTER TABLE ONLY public.strain
 
 
 --
--- Name: human_gene_synonym_rel fk164i1het18j033e8a67r38j1; Type: FK CONSTRAINT; Schema: public; Owner: ref_admin
+-- Name: human_gene_synonym_rel fk164i1het18j033e8a67r38j1; Type: FK CONSTRAINT; Schema: public; Owner: tp_admin
 --
 
 ALTER TABLE ONLY public.human_gene_synonym_rel
@@ -1079,7 +1128,7 @@ ALTER TABLE ONLY public.human_gene_synonym_rel
 
 
 --
--- Name: human_gene_synonym_rel fk4veyu9qij3aukv51oei4cj0cc; Type: FK CONSTRAINT; Schema: public; Owner: ref_admin
+-- Name: human_gene_synonym_rel fk4veyu9qij3aukv51oei4cj0cc; Type: FK CONSTRAINT; Schema: public; Owner: tp_admin
 --
 
 ALTER TABLE ONLY public.human_gene_synonym_rel
@@ -1088,7 +1137,7 @@ ALTER TABLE ONLY public.human_gene_synonym_rel
 
 
 --
--- Name: human_disease_omim fk7rytqghme1ffa7wj8v4oh5t0u; Type: FK CONSTRAINT; Schema: public; Owner: ref_admin
+-- Name: human_disease_omim fk7rytqghme1ffa7wj8v4oh5t0u; Type: FK CONSTRAINT; Schema: public; Owner: tp_admin
 --
 
 ALTER TABLE ONLY public.human_disease_omim
@@ -1097,7 +1146,7 @@ ALTER TABLE ONLY public.human_disease_omim
 
 
 --
--- Name: human_gene_disease fkblmwwdjhuxma76hvore5hoi36; Type: FK CONSTRAINT; Schema: public; Owner: ref_admin
+-- Name: human_gene_disease fkblmwwdjhuxma76hvore5hoi36; Type: FK CONSTRAINT; Schema: public; Owner: tp_admin
 --
 
 ALTER TABLE ONLY public.human_gene_disease
@@ -1105,7 +1154,7 @@ ALTER TABLE ONLY public.human_gene_disease
 
 
 --
--- Name: mouse_gene_synonym_relation fkbq04orkw7wfwvjejgdb4bp1hx; Type: FK CONSTRAINT; Schema: public; Owner: ref_admin
+-- Name: mouse_gene_synonym_relation fkbq04orkw7wfwvjejgdb4bp1hx; Type: FK CONSTRAINT; Schema: public; Owner: tp_admin
 --
 
 ALTER TABLE ONLY public.mouse_gene_synonym_relation
@@ -1114,7 +1163,7 @@ ALTER TABLE ONLY public.mouse_gene_synonym_relation
 
 
 --
--- Name: mouse_gene_allele fkhakinpmpgq30o15elm57x4cpq; Type: FK CONSTRAINT; Schema: public; Owner: ref_admin
+-- Name: mouse_gene_allele fkhakinpmpgq30o15elm57x4cpq; Type: FK CONSTRAINT; Schema: public; Owner: tp_admin
 --
 
 ALTER TABLE ONLY public.mouse_gene_allele
@@ -1122,7 +1171,7 @@ ALTER TABLE ONLY public.mouse_gene_allele
 
 
 --
--- Name: mouse_gene_synonym_relation fkhj32ev2dpo1oselyy6ymeq562; Type: FK CONSTRAINT; Schema: public; Owner: ref_admin
+-- Name: mouse_gene_synonym_relation fkhj32ev2dpo1oselyy6ymeq562; Type: FK CONSTRAINT; Schema: public; Owner: tp_admin
 --
 
 ALTER TABLE ONLY public.mouse_gene_synonym_relation
@@ -1132,7 +1181,7 @@ ALTER TABLE ONLY public.mouse_gene_synonym_relation
 
 
 --
--- Name: human_gene_disease fkjaxkft6y824w2k3f93ml1ofci; Type: FK CONSTRAINT; Schema: public; Owner: ref_admin
+-- Name: human_gene_disease fkjaxkft6y824w2k3f93ml1ofci; Type: FK CONSTRAINT; Schema: public; Owner: tp_admin
 --
 
 ALTER TABLE ONLY public.human_gene_disease
@@ -1140,7 +1189,7 @@ ALTER TABLE ONLY public.human_gene_disease
 
 
 --
--- Name: human_disease_omim fkjt9bgr6vcvpy33oq8cbt1u1vu; Type: FK CONSTRAINT; Schema: public; Owner: ref_admin
+-- Name: human_disease_omim fkjt9bgr6vcvpy33oq8cbt1u1vu; Type: FK CONSTRAINT; Schema: public; Owner: tp_admin
 --
 
 ALTER TABLE ONLY public.human_disease_omim
@@ -1150,7 +1199,7 @@ ALTER TABLE ONLY public.human_disease_omim
 
 
 --
--- Name: mouse_gene_allele fkru8bt6pm5davofi7o73bn1j69; Type: FK CONSTRAINT; Schema: public; Owner: ref_admin
+-- Name: mouse_gene_allele fkru8bt6pm5davofi7o73bn1j69; Type: FK CONSTRAINT; Schema: public; Owner: tp_admin
 --
 
 ALTER TABLE ONLY public.mouse_gene_allele
@@ -1160,7 +1209,7 @@ ALTER TABLE ONLY public.mouse_gene_allele
 
 
 --
--- Name: ortholog fksx4xwbhlgssh52ougho53kyty; Type: FK CONSTRAINT; Schema: public; Owner: ref_admin
+-- Name: ortholog fksx4xwbhlgssh52ougho53kyty; Type: FK CONSTRAINT; Schema: public; Owner: tp_admin
 --
 
 ALTER TABLE ONLY public.ortholog
@@ -1169,7 +1218,7 @@ ALTER TABLE ONLY public.ortholog
 
 
 --
--- Name: ortholog fktgaxn9urr6pxq4spqllt8b36y; Type: FK CONSTRAINT; Schema: public; Owner: ref_admin
+-- Name: ortholog fktgaxn9urr6pxq4spqllt8b36y; Type: FK CONSTRAINT; Schema: public; Owner: tp_admin
 --
 
 ALTER TABLE ONLY public.ortholog
