@@ -1277,6 +1277,13 @@ REVOKE ALL ON SCHEMA public FROM hasurauser;
 
 GRANT SELECT ON ALL TABLES IN SCHEMA public TO hasurauser;
 GRANT SELECT ON ALL SEQUENCES IN SCHEMA public TO hasurauser;
+GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA public TO hasurauser;
+
+-- 
+-- Prevent Hasura from adding additional tables or triggers
+-- 
+
+ALTER DEFAULT PRIVILEGES IN SCHEMA public REVOKE ALL PRIVILEGES FROM hasurauser;
 
 -- Similarly add this for other schemas, if you have any.
 -- GRANT USAGE ON SCHEMA <schema-name> TO hasurauser;
