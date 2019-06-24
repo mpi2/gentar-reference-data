@@ -1191,7 +1191,7 @@ ALTER TABLE ONLY public.ortholog
 -- However this is causing an issue when specifying the SQL in the docker container.
 
 
-SET search_path TO public;
+SET search_path TO hdb_catalog, hdb_views, public;
 
 -- 
 -- TRIGGERS
@@ -1272,6 +1272,9 @@ GRANT SELECT ON ALL TABLES IN SCHEMA pg_catalog TO hasurauser;
 -- grant all privileges on all tables in the public schema. This can be customised:
 -- For example, if you only want to use GraphQL regular queries and not mutations,
 -- then you can set: GRANT SELECT ON ALL TABLES...
+
+REVOKE ALL ON SCHEMA public FROM hasurauser;
+
 GRANT SELECT ON ALL TABLES IN SCHEMA public TO hasurauser;
 GRANT SELECT ON ALL SEQUENCES IN SCHEMA public TO hasurauser;
 

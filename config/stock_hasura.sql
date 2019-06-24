@@ -20,7 +20,7 @@ SET row_security = off;
 -- Name: hdb_catalog; Type: SCHEMA; Schema: -; Owner: hasurauser
 --
 
-CREATE SCHEMA hdb_catalog;
+CREATE SCHEMA IF NOT EXISTS hdb_catalog;
 
 
 ALTER SCHEMA hdb_catalog OWNER TO hasurauser;
