@@ -680,16 +680,16 @@ ALTER SEQUENCE public.human_gene_synonym_id_seq OWNED BY public.human_gene_synon
 
 
 --
--- Name: human_gene_synonym_rel; Type: TABLE; Schema: public; Owner: ref_admin
+-- Name: human_gene_synonym_relation; Type: TABLE; Schema: public; Owner: ref_admin
 --
 
-CREATE TABLE public.human_gene_synonym_rel (
+CREATE TABLE public.human_gene_synonym_relation (
     human_gene_id bigint NOT NULL,
     human_gene_synonym_id bigint NOT NULL
 );
 
 
-ALTER TABLE public.human_gene_synonym_rel OWNER TO ref_admin;
+ALTER TABLE public.human_gene_synonym_relation OWNER TO ref_admin;
 
 --
 -- Name: omim_table; Type: TABLE; Schema: public; Owner: ref_admin
@@ -957,11 +957,11 @@ ALTER TABLE ONLY public.human_gene_synonym
 
 
 --
--- Name: human_gene_synonym_rel human_gene_synonym_rel_pkey; Type: CONSTRAINT; Schema: public; Owner: ref_admin
+-- Name: human_gene_synonym_relation human_gene_synonym_relation_pkey; Type: CONSTRAINT; Schema: public; Owner: ref_admin
 --
 
-ALTER TABLE ONLY public.human_gene_synonym_rel
-    ADD CONSTRAINT human_gene_synonym_rel_pkey PRIMARY KEY (human_gene_id, human_gene_synonym_id);
+ALTER TABLE ONLY public.human_gene_synonym_relation
+    ADD CONSTRAINT human_gene_synonym_relation_pkey PRIMARY KEY (human_gene_id, human_gene_synonym_id);
 
 
 
@@ -1073,19 +1073,19 @@ ALTER TABLE ONLY public.strain
 
 
 --
--- Name: human_gene_synonym_rel fk164i1het18j033e8a67r38j1; Type: FK CONSTRAINT; Schema: public; Owner: ref_admin
+-- Name: human_gene_synonym_relation fk164i1het18j033e8a67r38j1; Type: FK CONSTRAINT; Schema: public; Owner: ref_admin
 --
 
-ALTER TABLE ONLY public.human_gene_synonym_rel
+ALTER TABLE ONLY public.human_gene_synonym_relation
     ADD CONSTRAINT fk164i1het18j033e8a67r38j1 FOREIGN KEY (human_gene_synonym_id) REFERENCES public.human_gene_synonym(id);
 
 
 
 --
--- Name: human_gene_synonym_rel fk4veyu9qij3aukv51oei4cj0cc; Type: FK CONSTRAINT; Schema: public; Owner: ref_admin
+-- Name: human_gene_synonym_relation fk4veyu9qij3aukv51oei4cj0cc; Type: FK CONSTRAINT; Schema: public; Owner: ref_admin
 --
 
-ALTER TABLE ONLY public.human_gene_synonym_rel
+ALTER TABLE ONLY public.human_gene_synonym_relation
     ADD CONSTRAINT fk4veyu9qij3aukv51oei4cj0cc FOREIGN KEY (human_gene_id) REFERENCES public.human_gene(id);
 
 

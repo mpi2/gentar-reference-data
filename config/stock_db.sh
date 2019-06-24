@@ -66,7 +66,7 @@ WHERE mouse_gene.mgi_id = mouse_gene_synonym.mgi_id"
 psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "INSERT INTO human_gene (symbol,name,hgnc_id) 
 SELECT symbol,name,hgnc_id from hgnc_gene"
 
-psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "INSERT INTO human_gene_synonym_rel (human_gene_id, human_gene_synonym_id) 
+psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "INSERT INTO human_gene_synonym_relation (human_gene_id, human_gene_synonym_id) 
 SELECT human_gene.id, human_gene_synonym.id
 FROM  human_gene, human_gene_synonym
 WHERE human_gene.hgnc_id = human_gene_synonym.hgnc_id"

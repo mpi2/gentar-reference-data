@@ -683,7 +683,7 @@ public	human_disease_omim	public	select	{"filter": {}, "columns": ["human_diseas
 public	human_gene	public	select	{"filter": {}, "columns": ["id", "created_at", "created_by", "last_modified", "last_modified_by", "hgnc_id", "name", "symbol"], "allow_aggregations": true}	\N	f
 public	human_gene_disease	public	select	{"filter": {}, "columns": ["id", "human_evidence", "mgi_id", "mouse_evidence", "human_disease_id", "human_gene_id"], "allow_aggregations": true}	\N	f
 public	human_gene_synonym	public	select	{"filter": {}, "columns": ["id", "created_at", "created_by", "last_modified", "last_modified_by", "hgnc_id", "synonym"], "allow_aggregations": true}	\N	f
-public	human_gene_synonym_rel	public	select	{"filter": {}, "columns": ["human_gene_id", "human_gene_synonym_id"], "allow_aggregations": true}	\N	f
+public	human_gene_synonym_relation	public	select	{"filter": {}, "columns": ["human_gene_id", "human_gene_synonym_id"], "allow_aggregations": true}	\N	f
 public	mgi_allele	public	select	{"filter": {}, "columns": ["id", "allele_name", "allele_symbol", "cell_line_ids", "db_name", "gene_symbol", "mgi_allele_id", "mgi_id", "project_id"], "allow_aggregations": true}	\N	f
 public	mgi_disease	public	select	{"filter": {}, "columns": ["id", "disease_name", "doid", "entrez_id", "homologene_id", "mgi_id", "omim_ids", "organism_name", "symbol", "taxon_id"], "allow_aggregations": true}	\N	f
 public	mgi_gene	public	select	{"filter": {}, "columns": ["id", "ensembl_chromosome", "ensembl_gene_id", "ensembl_start", "ensembl_stop", "ensembl_strand", "entrez_gene_id", "genome_build", "mgi_id", "name", "ncbi_chromosome", "ncbi_start", "ncbi_stop", "ncbi_strand", "symbol", "type"], "allow_aggregations": true}	\N	f
@@ -739,13 +739,13 @@ public	human_disease	human_gene_diseases	array	{"foreign_key_constraint_on": {"t
 public	human_disease_omim	human_disease	object	{"foreign_key_constraint_on": "human_disease_id"}	\N	f
 public	human_disease_omim	omim_table	object	{"foreign_key_constraint_on": "omim_table_id"}	\N	f
 public	human_gene	human_gene_diseases	array	{"foreign_key_constraint_on": {"table": "human_gene_disease", "column": "human_gene_id"}}	\N	f
-public	human_gene	human_gene_synonym_rels	array	{"foreign_key_constraint_on": {"table": "human_gene_synonym_rel", "column": "human_gene_id"}}	\N	f
+public	human_gene	human_gene_synonym_relations	array	{"foreign_key_constraint_on": {"table": "human_gene_synonym_relation", "column": "human_gene_id"}}	\N	f
 public	human_gene	orthologs	array	{"foreign_key_constraint_on": {"table": "ortholog", "column": "human_gene_id"}}	\N	f
 public	human_gene_disease	human_disease	object	{"foreign_key_constraint_on": "human_disease_id"}	\N	f
 public	human_gene_disease	human_gene	object	{"foreign_key_constraint_on": "human_gene_id"}	\N	f
-public	human_gene_synonym	human_gene_synonym_rels	array	{"foreign_key_constraint_on": {"table": "human_gene_synonym_rel", "column": "human_gene_synonym_id"}}	\N	f
-public	human_gene_synonym_rel	human_gene	object	{"foreign_key_constraint_on": "human_gene_id"}	\N	f
-public	human_gene_synonym_rel	human_gene_synonym	object	{"foreign_key_constraint_on": "human_gene_synonym_id"}	\N	f
+public	human_gene_synonym	human_gene_synonym_relations	array	{"foreign_key_constraint_on": {"table": "human_gene_synonym_relation", "column": "human_gene_synonym_id"}}	\N	f
+public	human_gene_synonym_relation	human_gene	object	{"foreign_key_constraint_on": "human_gene_id"}	\N	f
+public	human_gene_synonym_relation	human_gene_synonym	object	{"foreign_key_constraint_on": "human_gene_synonym_id"}	\N	f
 public	mouse_allele	mouse_gene_alleles	array	{"foreign_key_constraint_on": {"table": "mouse_gene_allele", "column": "allele_id"}}	\N	f
 public	mouse_gene	mouse_gene_alleles	array	{"foreign_key_constraint_on": {"table": "mouse_gene_allele", "column": "mouse_gene_id"}}	\N	f
 public	mouse_gene	mouse_gene_synonym_relations	array	{"foreign_key_constraint_on": {"table": "mouse_gene_synonym_relation", "column": "mouse_gene_id"}}	\N	f
@@ -933,7 +933,7 @@ public	human_disease_omim	f
 public	human_gene	f
 public	human_gene_disease	f
 public	human_gene_synonym	f
-public	human_gene_synonym_rel	f
+public	human_gene_synonym_relation	f
 public	mgi_allele	f
 public	mgi_disease	f
 public	mgi_gene	f
