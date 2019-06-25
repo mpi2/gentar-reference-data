@@ -54,7 +54,11 @@ psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "\copy human_ge
 ################################################
 # gene_entries.sql -- CONVERT TO A PSQL command
 
-psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "INSERT INTO mouse_gene (symbol,name,mgi_id,type,genome_build,entrez_gene_id,ncbi_chromosome,ncbi_start,ncbi_stop,ncbi_strand,ensembl_gene_id,ensembl_chromosome,ensembl_start,ensembl_stop,ensembl_strand) SELECT symbol,name,mgi_id,type,genome_build,entrez_gene_id,ncbi_chromosome,ncbi_start,ncbi_stop,ncbi_strand,ensembl_gene_id,ensembl_chromosome,ensembl_start,ensembl_stop,ensembl_strand from mgi_gene"
+psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "INSERT INTO mouse_gene (symbol,name,mgi_id,type,genome_build,entrez_gene_id,ncbi_chromosome,ncbi_start,ncbi_stop,ncbi_strand,ensembl_gene_id,ensembl_chromosome,ensembl_start,ensembl_stop,ensembl_strand,mgi_gene_id) SELECT symbol,name,mgi_id,type,genome_build,entrez_gene_id,ncbi_chromosome,ncbi_start,ncbi_stop,ncbi_strand,ensembl_gene_id,ensembl_chromosome,ensembl_start,ensembl_stop,ensembl_strand,id from mgi_gene"
+
+psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "UPDATE mouse_gene set mgi_mrk_list2_id = x.id from mouse_gene m, mgi_mrk_list2 x where m.mgi_id=x.mgi_id"
+
+psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "UPDATE mouse_gene set hcop_id = x.id from mouse_gene m, hcop x where m.mgi_id=x.mgi_id"
 
 
 psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "INSERT INTO mouse_gene_synonym_relation (mouse_gene_id, mouse_gene_synonym_id) 
@@ -65,6 +69,9 @@ WHERE mouse_gene.mgi_id = mouse_gene_synonym.mgi_id"
 
 psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "INSERT INTO human_gene (symbol,name,hgnc_id,hgnc_gene_id) 
 SELECT symbol,name,hgnc_id,id from hgnc_gene"
+
+psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "UPDATE human_gene set hcop_id = x.id from human_gene h, hcop x where h.hgnc_id = x.hgnc_id"
+
 
 psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "INSERT INTO human_gene_synonym_relation (human_gene_id, human_gene_synonym_id) 
 SELECT human_gene.id, human_gene_synonym.id
@@ -100,6 +107,13 @@ tail -n +8 /mnt/MGI_PhenotypicAllele.rpt.test.txt | psql -v ON_ERROR_STOP=1 -U "
 psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "INSERT INTO mouse_allele (allele_symbol,mgi_id,name)
 select a.allele_symbol,a.mgi_allele_id, a.allele_name from mgi_allele a, mouse_gene m where a.mgi_id=m.mgi_id UNION select p.allele_symbol,p.mgi_allele_id, p.allele_name from mgi_phenotypic_allele p, mouse_gene m2 where p.mgi_id=m2.mgi_id"
 
+# Enter the foreign key ids:
+psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "UPDATE mouse_allele set mgi_allele_id = a.id from mgi_allele a, mouse_allele aa where a.mgi_allele_id=aa.mgi_id and a.allele_symbol=aa.allele_symbol"
+
+psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "UPDATE mouse_allele set mgi_phenotypic_allele_id = a.id  from mgi_phenotypic_allele a, mouse_allele aa where a.mgi_id=aa.mgi_allele_id and a.allele_symbol=aa.allele_symbol"
+
+
+
 
 psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "INSERT INTO mouse_gene_allele (mouse_gene_id,allele_id)
 select m.id, aa.id from mgi_allele a, mouse_gene m, mouse_allele aa where a.mgi_id=m.mgi_id and a.mgi_allele_id=aa.mgi_id
@@ -113,8 +127,8 @@ UNION select m2.id,aa2.id from mgi_phenotypic_allele p, mouse_gene m2, mouse_all
 cat /mnt/MGI_DO.rpt | psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "\copy mgi_disease (doid,disease_name,omim_ids,homologene_id,organism_name,taxon_id,symbol,entrez_id,mgi_id) FROM STDIN with (DELIMITER E'\t', NULL '', FORMAT CSV, header TRUE, ENCODING 'UTF8')"
 
 
-psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "INSERT INTO human_disease (do_id,name)
-select doid,disease_name from mgi_disease group by doid,disease_name"
+psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "INSERT INTO human_disease (do_id,name,mgi_disease_id)
+select doid,disease_name,id from mgi_disease group by doid,disease_name"
 
 psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "INSERT INTO omim_table (omim_id)
 select distinct(unnest(string_to_array(omim_ids, '|'))) from mgi_disease where omim_ids is not null"
