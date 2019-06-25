@@ -375,10 +375,6 @@ CREATE TABLE public.mouse_allele (
     id bigint NOT NULL,
     mgi_allele_id bigint,
     mgi_phenotypic_allele_id bigint,
-    created_at timestamp without time zone,
-    created_by character varying(255),
-    last_modified timestamp without time zone,
-    last_modified_by character varying(255),
     allele_symbol character varying(255) NOT NULL,
     mgi_id character varying(255),
     name text
@@ -417,10 +413,6 @@ CREATE TABLE public.mouse_gene (
     mgi_gene_id bigint NOT NULL,
     mgi_mrk_list2_id bigint,
     hcop_id bigint,
-    created_at timestamp without time zone,
-    created_by character varying(255),
-    last_modified timestamp without time zone,
-    last_modified_by character varying(255),
     ensembl_chromosome character varying(255),
     ensembl_gene_id character varying(255),
     ensembl_start bigint,
@@ -480,10 +472,6 @@ ALTER SEQUENCE public.mouse_gene_id_seq OWNED BY public.mouse_gene.id;
 
 CREATE TABLE public.mouse_gene_synonym (
     id bigint NOT NULL,
-    created_at timestamp without time zone,
-    created_by character varying(255),
-    last_modified timestamp without time zone,
-    last_modified_by character varying(255),
     mgi_id character varying(255),
     synonym character varying(255)
 );
@@ -579,10 +567,6 @@ CREATE TABLE public.human_gene (
     id bigint NOT NULL,
     hgnc_gene_id bigint NOT NULL,
     hcop_id bigint,
-    created_at timestamp without time zone,
-    created_by character varying(255),
-    last_modified timestamp without time zone,
-    last_modified_by character varying(255),
     hgnc_id character varying(255) NOT NULL,
     name character varying(255) NOT NULL,
     symbol character varying(255) NOT NULL
@@ -655,10 +639,6 @@ ALTER SEQUENCE public.human_gene_id_seq OWNED BY public.human_gene.id;
 
 CREATE TABLE public.human_gene_synonym (
     id bigint NOT NULL,
-    created_at timestamp without time zone,
-    created_by character varying(255),
-    last_modified timestamp without time zone,
-    last_modified_by character varying(255),
     hgnc_id character varying(255),
     synonym character varying(255)
 );
@@ -753,10 +733,6 @@ ALTER TABLE public.ortholog OWNER TO ref_admin;
 
 CREATE TABLE public.strain (
     id bigint NOT NULL,
-    created_at timestamp without time zone,
-    created_by character varying(255),
-    last_modified timestamp without time zone,
-    last_modified_by character varying(255),
     mgi_id character varying(255),
     name text NOT NULL,
     type character varying(255)
