@@ -414,6 +414,8 @@ ALTER SEQUENCE public.mouse_allele_id_seq OWNED BY public.mouse_allele.id;
 
 CREATE TABLE public.mouse_gene (
     id bigint NOT NULL,
+    mgi_gene_id bigint NOT NULL,
+    mgi_mrk_list2_id bigint,
     hcop_id bigint,
     created_at timestamp without time zone,
     created_by character varying(255),
@@ -528,6 +530,7 @@ ALTER TABLE public.mouse_gene_synonym_relation OWNER TO ref_admin;
 
 CREATE TABLE public.human_disease (
     id bigint NOT NULL,
+    mgi_disease_id bigint NOT NULL,
     do_id character varying(255),
     name character varying(255)
 );
@@ -1078,6 +1081,20 @@ ALTER TABLE ONLY public.strain
 
 
 
+
+
+--
+-- Name: human_disease fk284iejet18j033e8a67r90s1; Type: FK CONSTRAINT; Schema: public; Owner: ref_admin
+--
+
+ALTER TABLE ONLY public.human_disease
+    ADD CONSTRAINT human_disease_mgi_disease_id_unique UNIQUE (mgi_disease_id);
+
+ALTER TABLE ONLY public.human_disease
+    ADD CONSTRAINT fk284iejet18j033e8a67r90s1 FOREIGN KEY (mgi_disease_id) REFERENCES public.mgi_disease(id);
+
+
+
 --
 -- Name: mouse_allele fk235iejet18j033e8a67r28d2; Type: FK CONSTRAINT; Schema: public; Owner: ref_admin
 --
@@ -1100,6 +1117,30 @@ ALTER TABLE ONLY public.mouse_allele
 
 ALTER TABLE ONLY public.mouse_allele
     ADD CONSTRAINT fk394iejet18j033e8a67r62j9 FOREIGN KEY (mgi_phenotypic_allele_id) REFERENCES public.mgi_phenotypic_allele(id);
+
+
+
+--
+-- Name: mouse_gene fk457iejet18j033e8a67r7628; Type: FK CONSTRAINT; Schema: public; Owner: ref_admin
+--
+
+ALTER TABLE ONLY public.mouse_gene
+    ADD CONSTRAINT mouse_gene_mgi_gene_id_unique UNIQUE (mgi_gene_id);
+
+ALTER TABLE ONLY public.mouse_gene
+    ADD CONSTRAINT fk457iejet18j033e8a67r7628 FOREIGN KEY (mgi_gene_id) REFERENCES public.mgi_gene(id);
+
+
+
+--
+-- Name: mouse_gene fk739iejet18j033e8a67r45y0; Type: FK CONSTRAINT; Schema: public; Owner: ref_admin
+--
+
+ALTER TABLE ONLY public.mouse_gene
+    ADD CONSTRAINT mouse_gene_mgi_mrk_list2_id_unique UNIQUE (mgi_mrk_list2_id);
+
+ALTER TABLE ONLY public.mouse_gene
+    ADD CONSTRAINT fk739iejet18j033e8a67r45y0 FOREIGN KEY (mgi_mrk_list2_id) REFERENCES public.mgi_mrk_list2(id);
 
 
 
