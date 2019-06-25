@@ -571,6 +571,7 @@ ALTER TABLE public.human_disease_omim OWNER TO ref_admin;
 
 CREATE TABLE public.human_gene (
     id bigint NOT NULL,
+    hgnc_gene_id bigint NOT NULL,
     created_at timestamp without time zone,
     created_by character varying(255),
     last_modified timestamp without time zone,
@@ -1069,6 +1070,17 @@ ALTER TABLE ONLY public.ortholog
 
 ALTER TABLE ONLY public.strain
     ADD CONSTRAINT strain_pkey PRIMARY KEY (id);
+
+
+
+
+
+--
+-- Name: human_gene fk164i1het18j033e8a67r38j1; Type: FK CONSTRAINT; Schema: public; Owner: ref_admin
+--
+
+ALTER TABLE ONLY public.human_gene
+    ADD CONSTRAINT fk194i1het18j033e8a67r40g1 FOREIGN KEY (hgnc_gene_id) REFERENCES public.hgnc_gene(id);
 
 
 
