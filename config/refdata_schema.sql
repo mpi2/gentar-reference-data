@@ -1080,6 +1080,9 @@ ALTER TABLE ONLY public.strain
 --
 
 ALTER TABLE ONLY public.human_gene
+    ADD CONSTRAINT human_gene_hgnc_gene_id_unique UNIQUE (hgnc_gene_id);
+
+ALTER TABLE ONLY public.human_gene
     ADD CONSTRAINT fk194i1het18j033e8a67r40g1 FOREIGN KEY (hgnc_gene_id) REFERENCES public.hgnc_gene(id);
 
 
