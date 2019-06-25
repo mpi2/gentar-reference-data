@@ -373,6 +373,8 @@ ALTER SEQUENCE public.mgi_phenotypic_allele_id_seq OWNED BY public.mgi_phenotypi
 
 CREATE TABLE public.mouse_allele (
     id bigint NOT NULL,
+    mgi_allele_id bigint,
+    mgi_phenotypic_allele_id bigint,
     created_at timestamp without time zone,
     created_by character varying(255),
     last_modified timestamp without time zone,
@@ -412,6 +414,7 @@ ALTER SEQUENCE public.mouse_allele_id_seq OWNED BY public.mouse_allele.id;
 
 CREATE TABLE public.mouse_gene (
     id bigint NOT NULL,
+    hcop_id bigint,
     created_at timestamp without time zone,
     created_by character varying(255),
     last_modified timestamp without time zone,
@@ -572,6 +575,7 @@ ALTER TABLE public.human_disease_omim OWNER TO ref_admin;
 CREATE TABLE public.human_gene (
     id bigint NOT NULL,
     hgnc_gene_id bigint NOT NULL,
+    hcop_id bigint,
     created_at timestamp without time zone,
     created_by character varying(255),
     last_modified timestamp without time zone,
@@ -1074,9 +1078,66 @@ ALTER TABLE ONLY public.strain
 
 
 
+--
+-- Name: mouse_allele fk235iejet18j033e8a67r28d2; Type: FK CONSTRAINT; Schema: public; Owner: ref_admin
+--
+
+ALTER TABLE ONLY public.mouse_allele
+    ADD CONSTRAINT mouse_allele_mgi_allele_id_unique UNIQUE (mgi_allele_id);
+
+ALTER TABLE ONLY public.mouse_allele
+    ADD CONSTRAINT fk235iejet18j033e8a67r28d2 FOREIGN KEY (mgi_allele_id) REFERENCES public.mgi_allele(id);
+
+
+
 
 --
--- Name: human_gene fk164i1het18j033e8a67r38j1; Type: FK CONSTRAINT; Schema: public; Owner: ref_admin
+-- Name: mouse_allele fk394iejet18j033e8a67r62j9; Type: FK CONSTRAINT; Schema: public; Owner: ref_admin
+--
+
+ALTER TABLE ONLY public.mouse_allele
+    ADD CONSTRAINT mouse_allele_mgi_phenotypic_allele_id_unique UNIQUE (mgi_phenotypic_allele_id);
+
+ALTER TABLE ONLY public.mouse_allele
+    ADD CONSTRAINT fk394iejet18j033e8a67r62j9 FOREIGN KEY (mgi_phenotypic_allele_id) REFERENCES public.mgi_phenotypic_allele(id);
+
+
+
+
+--
+-- Name: mouse_gene fk195iejet18j033e8a67r22a4; Type: FK CONSTRAINT; Schema: public; Owner: ref_admin
+--
+
+ALTER TABLE ONLY public.mouse_gene
+    ADD CONSTRAINT mouse_gene_hcop_id_unique UNIQUE (hcop_id);
+
+ALTER TABLE ONLY public.mouse_gene
+    ADD CONSTRAINT fk195iejet18j033e8a67r22a4 FOREIGN KEY (hcop_id) REFERENCES public.hcop(id);
+
+
+--
+-- Name: human_gene fk197i1het18j033e8a67r90t2; Type: FK CONSTRAINT; Schema: public; Owner: ref_admin
+--
+
+ALTER TABLE ONLY public.human_gene
+    ADD CONSTRAINT human_gene_hcop_id_unique UNIQUE (hcop_id);
+
+ALTER TABLE ONLY public.human_gene
+    ADD CONSTRAINT fk197i1het18j033e8a67r90t2 FOREIGN KEY (hcop_id) REFERENCES public.hcop(id);
+
+--
+-- Name: human_gene fk194i1het18j033e8a67r40g1; Type: FK CONSTRAINT; Schema: public; Owner: ref_admin
+--
+
+ALTER TABLE ONLY public.human_gene
+    ADD CONSTRAINT human_gene_hgnc_gene_id_unique UNIQUE (hgnc_gene_id);
+
+ALTER TABLE ONLY public.human_gene
+    ADD CONSTRAINT fk194i1het18j033e8a67r40g1 FOREIGN KEY (hgnc_gene_id) REFERENCES public.hgnc_gene(id);
+
+
+--
+-- Name: human_gene fk194i1het18j033e8a67r40g1; Type: FK CONSTRAINT; Schema: public; Owner: ref_admin
 --
 
 ALTER TABLE ONLY public.human_gene
