@@ -56,10 +56,11 @@ psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "\copy human_ge
 
 psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "INSERT INTO mouse_gene (symbol,name,mgi_id,type,genome_build,entrez_gene_id,ncbi_chromosome,ncbi_start,ncbi_stop,ncbi_strand,ensembl_gene_id,ensembl_chromosome,ensembl_start,ensembl_stop,ensembl_strand,mgi_gene_id) SELECT symbol,name,mgi_id,type,genome_build,entrez_gene_id,ncbi_chromosome,ncbi_start,ncbi_stop,ncbi_strand,ensembl_gene_id,ensembl_chromosome,ensembl_start,ensembl_stop,ensembl_strand,id from mgi_gene"
 
-psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "UPDATE mouse_gene set mgi_mrk_list2_id = x.id from mouse_gene m, mgi_mrk_list2 x where m.mgi_id=x.mgi_id"
-
 psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "UPDATE mouse_gene set hcop_id = x.id from mouse_gene m, hcop x where m.mgi_id=x.mgi_id"
 
+
+
+psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "UPDATE mouse_gene_synonym set mgi_mrk_list2_id = x.id from mouse_gene_synonym m, mgi_mrk_list2 x where m.mgi_id=x.mgi_id"
 
 psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "INSERT INTO mouse_gene_synonym_relation (mouse_gene_id, mouse_gene_synonym_id) 
 SELECT mouse_gene.id, mouse_gene_synonym.id
