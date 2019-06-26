@@ -105,14 +105,14 @@ tail -n +14 /mnt/KOMP_Allele.rpt | psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -
 tail -n +8 /mnt/MGI_PhenotypicAllele.rpt.test.txt | psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "\copy mgi_phenotypic_allele (mgi_allele_id,allele_symbol,allele_name,type,allele_attribute,pubmed_id,mgi_id,gene_symbol,refseq_id,ensembl_id,mp_ids,synonyms,gene_name) FROM STDIN with (DELIMITER E'\t', NULL '', FORMAT CSV, header FALSE, ENCODING 'UTF8')"
 
 
-psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "INSERT INTO mouse_allele (allele_symbol,mgi_id,name)
-select a.allele_symbol,a.mgi_allele_id, a.allele_name from mgi_allele a, mouse_gene m where a.mgi_id=m.mgi_id UNION select p.allele_symbol,p.mgi_allele_id, p.allele_name from mgi_phenotypic_allele p, mouse_gene m2 where p.mgi_id=m2.mgi_id"
+#psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "INSERT INTO mouse_allele (allele_symbol,mgi_id,name) select a.allele_symbol,a.mgi_allele_id, a.allele_name from mgi_allele a, mouse_gene m where a.mgi_id=m.mgi_id UNION select p.allele_symbol,p.mgi_allele_id, p.allele_name from mgi_phenotypic_allele p, mouse_gene m2 where p.mgi_id=m2.mgi_id"
 
 # Enter the foreign key ids:
 #psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "UPDATE mouse_allele set mgi_allele_id = a.id from mgi_allele a, mouse_allele aa where a.mgi_allele_id=aa.mgi_id and a.allele_symbol=aa.allele_symbol"
 
 #psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "UPDATE mouse_allele set mgi_phenotypic_allele_id = a.id  from mgi_phenotypic_allele a, mouse_allele aa where a.mgi_id=aa.mgi_allele_id and a.allele_symbol=aa.allele_symbol"
 
+psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "INSERT INTO mouse_allele (allele_symbol,mgi_id,name,mgi_allele_id,mgi_phenotypic_allele_id) select r.allele_symbol,r.mgi_allele_id,r.allele_name,r.mgi_allele_primary_key,r.mgi_phenotypic_allele_primary_key from (((select a.allele_symbol,a.mgi_allele_id, a.allele_name from mgi_allele a, mouse_gene m where a.mgi_id=m.mgi_id UNION select p.allele_symbol,p.mgi_allele_id, p.allele_name from mgi_phenotypic_allele p, mouse_gene m2 where p.mgi_id=m2.mgi_id) as x FULL OUTER JOIN (select aa.id as \"mgi_allele_primary_key\", aa.mgi_allele_id as \"mgi_allele_mgi_allele_id\" from mgi_allele aa, mouse_gene mm where aa.mgi_id=mm.mgi_id) as y ON x.mgi_allele_id = y.mgi_allele_mgi_allele_id) as xx FULL OUTER JOIN (select pp.id as \"mgi_phenotypic_allele_primary_key\", pp.mgi_allele_id as \"mgi_phenotypic_allele_mgi_allele_id\" from mgi_phenotypic_allele pp, mouse_gene m4 where pp.mgi_id=m4.mgi_id) as z ON xx.mgi_allele_id = z.mgi_phenotypic_allele_mgi_allele_id) as r group by r.allele_symbol,r.mgi_allele_id,r.allele_name,r.mgi_allele_primary_key,r.mgi_phenotypic_allele_primary_key"
 
 
 

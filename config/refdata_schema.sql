@@ -1073,9 +1073,6 @@ ALTER TABLE ONLY public.human_disease
 --
 
 ALTER TABLE ONLY public.mouse_allele
-    ADD CONSTRAINT mouse_allele_mgi_allele_id_unique UNIQUE (mgi_allele_id);
-
-ALTER TABLE ONLY public.mouse_allele
     ADD CONSTRAINT fk235iejet18j033e8a67r28d2 FOREIGN KEY (mgi_allele_id) REFERENCES public.mgi_allele(id);
 
 
@@ -1084,9 +1081,6 @@ ALTER TABLE ONLY public.mouse_allele
 --
 -- Name: mouse_allele fk394iejet18j033e8a67r62j9; Type: FK CONSTRAINT; Schema: public; Owner: ref_admin
 --
-
-ALTER TABLE ONLY public.mouse_allele
-    ADD CONSTRAINT mouse_allele_mgi_phenotypic_allele_id_unique UNIQUE (mgi_phenotypic_allele_id);
 
 ALTER TABLE ONLY public.mouse_allele
     ADD CONSTRAINT fk394iejet18j033e8a67r62j9 FOREIGN KEY (mgi_phenotypic_allele_id) REFERENCES public.mgi_phenotypic_allele(id);
