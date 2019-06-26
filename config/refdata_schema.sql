@@ -471,7 +471,7 @@ ALTER SEQUENCE public.mouse_gene_id_seq OWNED BY public.mouse_gene.id;
 
 CREATE TABLE public.mouse_gene_synonym (
     id bigint NOT NULL,
-    mgi_mrk_list2_id bigint NOT NULL,
+    mgi_mrk_list2_id bigint,
     mgi_id character varying(255),
     synonym character varying(255)
 );
