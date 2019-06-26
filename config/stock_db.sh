@@ -60,7 +60,7 @@ psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "INSERT INTO mo
 
 
 
-psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "UPDATE mouse_gene_synonym set mgi_mrk_list2_id = x.id from mouse_gene_synonym m, mgi_mrk_list2 x where m.mgi_id=x.mgi_id"
+# psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "UPDATE mouse_gene_synonym set mgi_mrk_list2_id = x.id from mouse_gene_synonym m, mgi_mrk_list2 x where m.mgi_id=x.mgi_id"
 
 psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "INSERT INTO mouse_gene_synonym_relation (mouse_gene_id, mouse_gene_synonym_id) 
 SELECT mouse_gene.id, mouse_gene_synonym.id
