@@ -411,7 +411,6 @@ ALTER SEQUENCE public.mouse_allele_id_seq OWNED BY public.mouse_allele.id;
 CREATE TABLE public.mouse_gene (
     id bigint NOT NULL,
     mgi_gene_id bigint NOT NULL,
-    hcop_id bigint,
     ensembl_chromosome character varying(255),
     ensembl_gene_id character varying(255),
     ensembl_start bigint,
@@ -566,7 +565,6 @@ ALTER TABLE public.human_disease_omim OWNER TO ref_admin;
 CREATE TABLE public.human_gene (
     id bigint NOT NULL,
     hgnc_gene_id bigint NOT NULL,
-    hcop_id bigint,
     hgnc_id character varying(255) NOT NULL,
     name character varying(255) NOT NULL,
     symbol character varying(255) NOT NULL
@@ -1121,26 +1119,6 @@ ALTER TABLE ONLY public.mouse_gene_synonym
 
 
 
---
--- Name: mouse_gene fk195iejet18j033e8a67r22a4; Type: FK CONSTRAINT; Schema: public; Owner: ref_admin
---
-
-ALTER TABLE ONLY public.mouse_gene
-    ADD CONSTRAINT mouse_gene_hcop_id_unique UNIQUE (hcop_id);
-
-ALTER TABLE ONLY public.mouse_gene
-    ADD CONSTRAINT fk195iejet18j033e8a67r22a4 FOREIGN KEY (hcop_id) REFERENCES public.hcop(id);
-
-
---
--- Name: human_gene fk197i1het18j033e8a67r90t2; Type: FK CONSTRAINT; Schema: public; Owner: ref_admin
---
-
-ALTER TABLE ONLY public.human_gene
-    ADD CONSTRAINT human_gene_hcop_id_unique UNIQUE (hcop_id);
-
-ALTER TABLE ONLY public.human_gene
-    ADD CONSTRAINT fk197i1het18j033e8a67r90t2 FOREIGN KEY (hcop_id) REFERENCES public.hcop(id);
 
 --
 -- Name: human_gene fk194i1het18j033e8a67r40g1; Type: FK CONSTRAINT; Schema: public; Owner: ref_admin
