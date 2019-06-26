@@ -129,7 +129,7 @@ cat /mnt/MGI_DO.rpt | psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_
 
 
 psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "INSERT INTO human_disease (do_id,name,mgi_disease_id)
-select doid,disease_name,id from mgi_disease group by doid,disease_name"
+select doid,disease_name,id from mgi_disease group by doid,disease_name,id"
 
 psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "INSERT INTO omim_table (omim_id)
 select distinct(unnest(string_to_array(omim_ids, '|'))) from mgi_disease where omim_ids is not null"
