@@ -470,7 +470,6 @@ ALTER SEQUENCE public.mouse_gene_id_seq OWNED BY public.mouse_gene.id;
 
 CREATE TABLE public.mouse_gene_synonym (
     id bigint NOT NULL,
-    mgi_mrk_list2_id bigint,
     mgi_id character varying(255),
     synonym character varying(255)
 );
@@ -1103,18 +1102,6 @@ ALTER TABLE ONLY public.mouse_gene
 
 ALTER TABLE ONLY public.mouse_gene
     ADD CONSTRAINT fk457iejet18j033e8a67r7628 FOREIGN KEY (mgi_gene_id) REFERENCES public.mgi_gene(id);
-
-
-
---
--- Name: mouse_gene_synonym fk739iejet18j033e8a67r45y0; Type: FK CONSTRAINT; Schema: public; Owner: ref_admin
---
-
-ALTER TABLE ONLY public.mouse_gene_synonym
-    ADD CONSTRAINT mouse_gene_synonym_mgi_mrk_list2_id_unique UNIQUE (mgi_mrk_list2_id);
-
-ALTER TABLE ONLY public.mouse_gene_synonym
-    ADD CONSTRAINT fk739iejet18j033e8a67r45y0 FOREIGN KEY (mgi_mrk_list2_id) REFERENCES public.mgi_mrk_list2(id);
 
 
 
