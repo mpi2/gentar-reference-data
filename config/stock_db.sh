@@ -69,8 +69,9 @@ WHERE mouse_gene.mgi_gene_acc_id = mouse_gene_synonym.mgi_gene_acc_id"
 
 
 # Create the final version of mgi_mrk_list2
+# - NOTE: there are different column names compared to mgi_mrk_list2_tmp
 
-psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "INSERT INTO mgi_mrk_list2 (mgi_id,chr,cM,start,stop,strand,symbol,status,name,marker_type,feature_type,synonyms,mouse_gene_id)
+psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "INSERT INTO mgi_mrk_list2 (mgi_marker_acc_id,chr,cM,start,stop,strand,symbol,status,name,marker_type,feature_type,synonyms,mouse_gene_id)
 select mrk.mgi_id,mrk.chr,mrk.cM,mrk.start,mrk.stop,mrk.strand,mrk.symbol,mrk.status,mrk.name,mrk.marker_type,mrk.feature_type,mrk.synonyms, mouse_gene.id FROM 
 mgi_mrk_list2_tmp mrk left outer join mouse_gene ON mrk.mgi_id = mouse_gene.mgi_gene_acc_id"
 
@@ -146,8 +147,10 @@ ON x.mgi_id = mouse_gene.mgi_gene_acc_id"
 psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "DROP table mgi_allele_tmp"
 
 
+# Create the production version of the mgi_phenotypic_allele table 
+# - NOTE: there are different column names compared to mgi_phenotypic_allele_tmp
 
-psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "INSERT INTO mgi_phenotypic_allele (mgi_allele_id,allele_symbol,allele_name,type,allele_attribute,pubmed_id,mgi_marker_id,gene_symbol,refseq_id,ensembl_id,mp_ids,synonyms,gene_name,mouse_allele_id,mouse_gene_id)
+psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "INSERT INTO mgi_phenotypic_allele (mgi_allele_acc_id,allele_symbol,allele_name,type,allele_attribute,pubmed_acc_id,mgi_marker_acc_id,gene_symbol,refseq_acc_id,ensembl_acc_id,mp_acc_ids,synonyms,gene_name,mouse_allele_id,mouse_gene_id)
 select x.mgi_allele_id,x.allele_symbol,x.allele_name,x.type,x.allele_attribute,x.pubmed_id,x.mgi_id,x.gene_symbol,x.refseq_id,x.ensembl_id,x.mp_ids,x.synonyms,x.gene_name,x.mouse_allele_id, mouse_gene.id
 FROM
 (select mp.mgi_allele_id,mp.allele_symbol,mp.allele_name,mp.type,mp.allele_attribute,mp.pubmed_id,mp.mgi_id,mp.gene_symbol,mp.refseq_id,mp.ensembl_id,mp.mp_ids,mp.synonyms,mp.gene_name, mouse_allele.id as \"mouse_allele_id\" FROM 
@@ -171,7 +174,7 @@ psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "DROP table mgi
 
 psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "INSERT INTO mouse_gene_allele (mouse_gene_id,mouse_allele_id)
 select m.id, aa.id from mgi_allele a, mouse_gene m, mouse_allele aa where a.mgi_marker_id=m.mgi_gene_acc_id and a.mgi_allele_id=aa.mgi_allele_acc_id
-UNION select m2.id,aa2.id from mgi_phenotypic_allele p, mouse_gene m2, mouse_allele aa2 where p.mgi_marker_id=m2.mgi_gene_acc_id and p.mgi_allele_id=aa2.mgi_allele_acc_id"
+UNION select m2.id,aa2.id from mgi_phenotypic_allele p, mouse_gene m2, mouse_allele aa2 where p.mgi_marker_acc_id=m2.mgi_gene_acc_id and p.mgi_allele_acc_id=aa2.mgi_allele_acc_id"
 
 ## Run test counts -- see MGI_Allele_data_load.txt
 
