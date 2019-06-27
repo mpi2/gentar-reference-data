@@ -913,7 +913,7 @@ ALTER TABLE public.ortholog OWNER TO ref_admin;
 
 CREATE TABLE public.strain (
     id bigint NOT NULL,
-    mgi_id character varying(255),
+    mgi_strain_acc_id character varying(255),
     name text NOT NULL,
     type character varying(255)
 );
