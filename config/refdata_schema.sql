@@ -105,11 +105,59 @@ ALTER TABLE public.hgnc_gene_id_seq OWNER TO ref_admin;
 ALTER SEQUENCE public.hgnc_gene_id_seq OWNED BY public.hgnc_gene.id;
 
 --
+-- Name: hcop_tmp; Type: TABLE; Schema: public; Owner: ref_admin
+--
+
+CREATE TABLE public.hcop_tmp (
+    id bigint NOT NULL,
+    hgnc_id character varying(255),
+    human_assert_ids text,
+    human_chr character varying(255),
+    human_ensembl_gene character varying(255),
+    human_entrez_gene bigint,
+    human_name character varying(255),
+    human_symbol character varying(255),
+    mgi_id character varying(255),
+    mouse_assert_ids text,
+    mouse_chr character varying(255),
+    mouse_ensembl_gene character varying(255),
+    mouse_entrez_gene bigint,
+    mouse_name character varying(255),
+    mouse_symbol character varying(255),
+    support text
+);
+
+
+ALTER TABLE public.hcop_tmp OWNER TO ref_admin;
+
+--
+-- Name: hcop_tmp_id_seq; Type: SEQUENCE; Schema: public; Owner: ref_admin
+--
+
+CREATE SEQUENCE public.hcop_tmp_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.hcop_tmp_id_seq OWNER TO ref_admin;
+
+--
+-- Name: hcop_tmp_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: ref_admin
+--
+
+ALTER SEQUENCE public.hcop_tmp_id_seq OWNED BY public.hcop_tmp.id;
+
+--
 -- Name: hcop; Type: TABLE; Schema: public; Owner: ref_admin
 --
 
 CREATE TABLE public.hcop (
     id bigint NOT NULL,
+    mouse_gene_id bigint,
+    human_gene_id bigint,
     hgnc_id character varying(255),
     human_assert_ids text,
     human_chr character varying(255),
@@ -156,13 +204,15 @@ ALTER SEQUENCE public.hcop_id_seq OWNED BY public.hcop.id;
 
 CREATE TABLE public.mgi_allele (
     id bigint NOT NULL,
+    mouse_allele_id bigint,
+    mouse_gene_id bigint,
     allele_name text,
     allele_symbol character varying(255),
     cell_line_ids text,
     db_name character varying(255),
     gene_symbol character varying(255),
     mgi_allele_id character varying(255),
-    mgi_id character varying(255),
+    mgi_marker_id character varying(255),
     project_id character varying(255)
 );
 
@@ -188,6 +238,47 @@ ALTER TABLE public.mgi_allele_id_seq OWNER TO ref_admin;
 --
 
 ALTER SEQUENCE public.mgi_allele_id_seq OWNED BY public.mgi_allele.id;
+
+
+
+--
+-- Name: mgi_allele_tmp; Type: TABLE; Schema: public; Owner: ref_admin
+--
+
+CREATE TABLE public.mgi_allele_tmp (
+    id bigint NOT NULL,
+    allele_name text,
+    allele_symbol character varying(255),
+    cell_line_ids text,
+    db_name character varying(255),
+    gene_symbol character varying(255),
+    mgi_allele_id character varying(255),
+    mgi_id character varying(255),
+    project_id character varying(255)
+);
+
+
+ALTER TABLE public.mgi_allele_tmp OWNER TO ref_admin;
+
+--
+-- Name: mgi_allele_tmp_id_seq; Type: SEQUENCE; Schema: public; Owner: ref_admin
+--
+
+CREATE SEQUENCE public.mgi_allele_tmp_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.mgi_allele_tmp_id_seq OWNER TO ref_admin;
+
+--
+-- Name: mgi_allele_tmp_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: ref_admin
+--
+
+ALTER SEQUENCE public.mgi_allele_tmp_id_seq OWNED BY public.mgi_allele_tmp.id;
 
 
 --
@@ -284,6 +375,7 @@ ALTER SEQUENCE public.mgi_gene_id_seq OWNED BY public.mgi_gene.id;
 
 CREATE TABLE public.mgi_mrk_list2 (
     id bigint NOT NULL,
+    mouse_gene_id bigint,
     cm character varying(255),
     chr character varying(255),
     feature_type character varying(255),
@@ -322,12 +414,59 @@ ALTER TABLE public.mgi_mrk_list2_id_seq OWNER TO ref_admin;
 ALTER SEQUENCE public.mgi_mrk_list2_id_seq OWNED BY public.mgi_mrk_list2.id;
 
 
+
+--
+-- Name: mgi_mrk_list2_tmp; Type: TABLE; Schema: public; Owner: ref_admin
+--
+
+CREATE TABLE public.mgi_mrk_list2_tmp (
+    id bigint NOT NULL,
+    cm character varying(255),
+    chr character varying(255),
+    feature_type character varying(255),
+    marker_type character varying(255),
+    mgi_id character varying(255),
+    name character varying(255),
+    start character varying(255),
+    status character varying(255),
+    stop character varying(255),
+    strand character varying(255),
+    symbol character varying(255),
+    synonyms text
+);
+
+
+ALTER TABLE public.mgi_mrk_list2_tmp OWNER TO ref_admin;
+
+--
+-- Name: mgi_mrk_list2_tmp_id_seq; Type: SEQUENCE; Schema: public; Owner: ref_admin
+--
+
+CREATE SEQUENCE public.mgi_mrk_list2_tmp_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.mgi_mrk_list2_tmp_id_seq OWNER TO ref_admin;
+
+--
+-- Name: mgi_mrk_list2_tmp_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: ref_admin
+--
+
+ALTER SEQUENCE public.mgi_mrk_list2_tmp_id_seq OWNED BY public.mgi_mrk_list2_tmp.id;
+
+
 --
 -- Name: mgi_phenotypic_allele; Type: TABLE; Schema: public; Owner: ref_admin
 --
 
 CREATE TABLE public.mgi_phenotypic_allele (
     id bigint NOT NULL,
+    mouse_allele_id bigint,
+    mouse_gene_id bigint,
     allele_attribute character varying(255),
     allele_name text,
     allele_symbol character varying(255),
@@ -335,7 +474,7 @@ CREATE TABLE public.mgi_phenotypic_allele (
     gene_name text,
     gene_symbol character varying(255),
     mgi_allele_id character varying(255),
-    mgi_id character varying(255),
+    mgi_marker_id character varying(255),
     mp_ids text,
     pubmed_id character varying(255),
     refseq_id character varying(255),
@@ -367,14 +506,58 @@ ALTER TABLE public.mgi_phenotypic_allele_id_seq OWNER TO ref_admin;
 ALTER SEQUENCE public.mgi_phenotypic_allele_id_seq OWNED BY public.mgi_phenotypic_allele.id;
 
 
+
+--
+-- Name: mgi_phenotypic_allele_tmp; Type: TABLE; Schema: public; Owner: ref_admin
+--
+
+CREATE TABLE public.mgi_phenotypic_allele_tmp (
+    id bigint NOT NULL,
+    allele_attribute character varying(255),
+    allele_name text,
+    allele_symbol character varying(255),
+    ensembl_id character varying(255),
+    gene_name text,
+    gene_symbol character varying(255),
+    mgi_allele_id character varying(255),
+    mgi_id character varying(255),
+    mp_ids text,
+    pubmed_id character varying(255),
+    refseq_id character varying(255),
+    synonyms text,
+    type character varying(255)
+);
+
+
+ALTER TABLE public.mgi_phenotypic_allele_tmp OWNER TO ref_admin;
+
+--
+-- Name: mgi_phenotypic_allele_tmp_id_seq; Type: SEQUENCE; Schema: public; Owner: ref_admin
+--
+
+CREATE SEQUENCE public.mgi_phenotypic_allele_tmp_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.mgi_phenotypic_allele_tmp_id_seq OWNER TO ref_admin;
+
+--
+-- Name: mgi_phenotypic_allele_tmp_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: ref_admin
+--
+
+ALTER SEQUENCE public.mgi_phenotypic_allele_tmp_id_seq OWNED BY public.mgi_phenotypic_allele_tmp.id;
+
+
 --
 -- Name: mouse_allele; Type: TABLE; Schema: public; Owner: ref_admin
 --
 
 CREATE TABLE public.mouse_allele (
     id bigint NOT NULL,
-    mgi_allele_id bigint,
-    mgi_phenotypic_allele_id bigint,
     allele_symbol character varying(255) NOT NULL,
     mgi_id character varying(255),
     name text
@@ -762,6 +945,11 @@ ALTER SEQUENCE public.strain_id_seq OWNED BY public.strain.id;
 
 
 
+--
+-- Name: hcop_tmp id; Type: DEFAULT; Schema: public; Owner: ref_admin
+--
+
+ALTER TABLE ONLY public.hcop_tmp ALTER COLUMN id SET DEFAULT nextval('public.hcop_tmp_id_seq'::regclass);
 
 
 
@@ -815,6 +1003,13 @@ ALTER TABLE ONLY public.mgi_allele ALTER COLUMN id SET DEFAULT nextval('public.m
 
 
 --
+-- Name: mgi_allele_tmp id; Type: DEFAULT; Schema: public; Owner: ref_admin
+--
+
+ALTER TABLE ONLY public.mgi_allele_tmp ALTER COLUMN id SET DEFAULT nextval('public.mgi_allele_tmp_id_seq'::regclass);
+
+
+--
 -- Name: mgi_disease id; Type: DEFAULT; Schema: public; Owner: ref_admin
 --
 
@@ -836,10 +1031,24 @@ ALTER TABLE ONLY public.mgi_mrk_list2 ALTER COLUMN id SET DEFAULT nextval('publi
 
 
 --
+-- Name: mgi_mrk_list2_tmp id; Type: DEFAULT; Schema: public; Owner: ref_admin
+--
+
+ALTER TABLE ONLY public.mgi_mrk_list2_tmp ALTER COLUMN id SET DEFAULT nextval('public.mgi_mrk_list2_tmp_id_seq'::regclass);
+
+
+--
 -- Name: mgi_phenotypic_allele id; Type: DEFAULT; Schema: public; Owner: ref_admin
 --
 
 ALTER TABLE ONLY public.mgi_phenotypic_allele ALTER COLUMN id SET DEFAULT nextval('public.mgi_phenotypic_allele_id_seq'::regclass);
+
+
+--
+-- Name: mgi_phenotypic_allele_tmp id; Type: DEFAULT; Schema: public; Owner: ref_admin
+--
+
+ALTER TABLE ONLY public.mgi_phenotypic_allele_tmp ALTER COLUMN id SET DEFAULT nextval('public.mgi_phenotypic_allele_tmp_id_seq'::regclass);
 
 
 --
@@ -878,6 +1087,12 @@ ALTER TABLE ONLY public.strain ALTER COLUMN id SET DEFAULT nextval('public.strai
 
 
 
+--
+-- Name: hcop_tmp hcop_tmp_pkey; Type: CONSTRAINT; Schema: public; Owner: ref_admin
+--
+
+ALTER TABLE ONLY public.hcop_tmp
+    ADD CONSTRAINT hcop_tmp_pkey PRIMARY KEY (id);
 
 
 
@@ -955,6 +1170,14 @@ ALTER TABLE ONLY public.mgi_allele
 
 
 --
+-- Name: mgi_allele_tmp mgi_allele_tmp_pkey; Type: CONSTRAINT; Schema: public; Owner: ref_admin
+--
+
+ALTER TABLE ONLY public.mgi_allele_tmp
+    ADD CONSTRAINT mgi_allele_tmp_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: mgi_disease mgi_disease_pkey; Type: CONSTRAINT; Schema: public; Owner: ref_admin
 --
 
@@ -979,11 +1202,27 @@ ALTER TABLE ONLY public.mgi_mrk_list2
 
 
 --
+-- Name: mgi_mrk_list2_tmp mgi_mrk_list2_tmp_pkey; Type: CONSTRAINT; Schema: public; Owner: ref_admin
+--
+
+ALTER TABLE ONLY public.mgi_mrk_list2_tmp
+    ADD CONSTRAINT mgi_mrk_list2_tmp_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: mgi_phenotypic_allele mgi_phenotypic_allele_pkey; Type: CONSTRAINT; Schema: public; Owner: ref_admin
 --
 
 ALTER TABLE ONLY public.mgi_phenotypic_allele
     ADD CONSTRAINT mgi_phenotypic_allele_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: mgi_phenotypic_allele_tmp mgi_phenotypic_allele_tmp_pkey; Type: CONSTRAINT; Schema: public; Owner: ref_admin
+--
+
+ALTER TABLE ONLY public.mgi_phenotypic_allele_tmp
+    ADD CONSTRAINT mgi_phenotypic_allele_tmp_pkey PRIMARY KEY (id);
 
 
 --
@@ -1069,21 +1308,37 @@ ALTER TABLE ONLY public.human_disease
 
 
 --
--- Name: mouse_allele fk235iejet18j033e8a67r28d2; Type: FK CONSTRAINT; Schema: public; Owner: ref_admin
+-- Name: mgi_allele fk235iejet18j033e8a67r28d2; Type: FK CONSTRAINT; Schema: public; Owner: ref_admin
 --
 
-ALTER TABLE ONLY public.mouse_allele
-    ADD CONSTRAINT fk235iejet18j033e8a67r28d2 FOREIGN KEY (mgi_allele_id) REFERENCES public.mgi_allele(id);
-
-
+ALTER TABLE ONLY public.mgi_allele
+    ADD CONSTRAINT fk235iejet18j033e8a67r28d2 FOREIGN KEY (mouse_allele_id) REFERENCES public.mouse_allele(id);
 
 
 --
--- Name: mouse_allele fk394iejet18j033e8a67r62j9; Type: FK CONSTRAINT; Schema: public; Owner: ref_admin
+-- Name: mgi_allele fk619iejet18j033e8a67r98w3; Type: FK CONSTRAINT; Schema: public; Owner: ref_admin
 --
 
-ALTER TABLE ONLY public.mouse_allele
-    ADD CONSTRAINT fk394iejet18j033e8a67r62j9 FOREIGN KEY (mgi_phenotypic_allele_id) REFERENCES public.mgi_phenotypic_allele(id);
+ALTER TABLE ONLY public.mgi_allele
+    ADD CONSTRAINT fk619iejet18j033e8a67r98w3 FOREIGN KEY (mouse_gene_id) REFERENCES public.mouse_gene(id);
+
+
+
+
+--
+-- Name: mgi_phenotypic_allele fk394iejet18j033e8a67r62j9; Type: FK CONSTRAINT; Schema: public; Owner: ref_admin
+--
+
+ALTER TABLE ONLY public.mgi_phenotypic_allele
+    ADD CONSTRAINT fk394iejet18j033e8a67r62j9 FOREIGN KEY (mouse_allele_id) REFERENCES public.mouse_allele(id);
+
+
+--
+-- Name: mgi_phenotypic_allele fk825iejet18j033e8a67r52l8; Type: FK CONSTRAINT; Schema: public; Owner: ref_admin
+--
+
+ALTER TABLE ONLY public.mgi_phenotypic_allele
+    ADD CONSTRAINT fk825iejet18j033e8a67r52l8 FOREIGN KEY (mouse_gene_id) REFERENCES public.mouse_gene(id);
 
 
 
@@ -1110,6 +1365,31 @@ ALTER TABLE ONLY public.human_gene
 
 ALTER TABLE ONLY public.human_gene
     ADD CONSTRAINT fk194i1het18j033e8a67r40g1 FOREIGN KEY (hgnc_gene_id) REFERENCES public.hgnc_gene(id);
+
+
+
+
+
+--
+-- Name: hcop fk893i1het18j033e8a67r63t0; Type: FK CONSTRAINT; Schema: public; Owner: ref_admin
+--
+
+ALTER TABLE ONLY public.hcop
+    ADD CONSTRAINT fk893i1het18j033e8a67r63t0 FOREIGN KEY (human_gene_id) REFERENCES public.human_gene(id);
+
+--
+-- Name: hcop fk460i1het18j033e8a67r63i5; Type: FK CONSTRAINT; Schema: public; Owner: ref_admin
+--
+
+ALTER TABLE ONLY public.hcop
+    ADD CONSTRAINT fk460i1het18j033e8a67r63i5 FOREIGN KEY (mouse_gene_id) REFERENCES public.mouse_gene(id);
+
+
+
+
+
+
+
 
 
 
