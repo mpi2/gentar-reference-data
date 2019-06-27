@@ -141,7 +141,7 @@ FROM
 (select ma.project_id,ma.db_name,ma.mgi_allele_id,ma.allele_symbol,ma.allele_name,ma.mgi_id,ma.gene_symbol,ma.cell_line_ids, mouse_allele.id as \"mouse_allele_id\" FROM 
 mgi_allele_tmp ma left outer join mouse_allele ON ma.mgi_allele_id = mouse_allele.mgi_id) x
 left outer join mouse_gene
-ON x.mgi_id = mouse_gene.mgi_id"
+ON x.mgi_id = mouse_gene.mgi_gene_acc_id"
 
 psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "DROP table mgi_allele_tmp"
 
