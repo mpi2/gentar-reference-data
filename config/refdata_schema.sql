@@ -559,7 +559,7 @@ ALTER SEQUENCE public.mgi_phenotypic_allele_tmp_id_seq OWNED BY public.mgi_pheno
 CREATE TABLE public.mouse_allele (
     id bigint NOT NULL,
     allele_symbol character varying(255) NOT NULL,
-    mgi_id character varying(255),
+    mgi_allele_acc_id character varying(255),
     name text
 );
 
