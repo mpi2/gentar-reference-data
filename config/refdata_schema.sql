@@ -653,7 +653,7 @@ ALTER SEQUENCE public.mouse_gene_id_seq OWNED BY public.mouse_gene.id;
 
 CREATE TABLE public.mouse_gene_synonym (
     id bigint NOT NULL,
-    mgi_id character varying(255),
+    mgi_gene_acc_id character varying(255),
     synonym character varying(255)
 );
 
@@ -865,7 +865,7 @@ ALTER TABLE public.human_gene_synonym_relation OWNER TO ref_admin;
 
 CREATE TABLE public.omim_table (
     id bigint NOT NULL,
-    omim_id character varying(255)
+    omim_acc_id character varying(255)
 );
 
 
