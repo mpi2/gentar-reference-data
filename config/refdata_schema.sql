@@ -620,7 +620,7 @@ ALTER TABLE public.mouse_gene OWNER TO ref_admin;
 
 CREATE TABLE public.mouse_gene_allele (
     mouse_gene_id bigint NOT NULL,
-    allele_id bigint NOT NULL
+    mouse_allele_id bigint NOT NULL
 );
 
 
@@ -1239,7 +1239,7 @@ ALTER TABLE ONLY public.mouse_allele
 --
 
 ALTER TABLE ONLY public.mouse_gene_allele
-    ADD CONSTRAINT mouse_gene_allele_pkey PRIMARY KEY (mouse_gene_id, allele_id);
+    ADD CONSTRAINT mouse_gene_allele_pkey PRIMARY KEY (mouse_gene_id, mouse_allele_id);
 
 
 --
@@ -1443,7 +1443,7 @@ ALTER TABLE ONLY public.mouse_gene_synonym_relation
 --
 
 ALTER TABLE ONLY public.mouse_gene_allele
-    ADD CONSTRAINT fkhakinpmpgq30o15elm57x4cpq FOREIGN KEY (allele_id) REFERENCES public.mouse_allele(id);
+    ADD CONSTRAINT fkhakinpmpgq30o15elm57x4cpq FOREIGN KEY (mouse_allele_id) REFERENCES public.mouse_allele(id);
 
 
 --

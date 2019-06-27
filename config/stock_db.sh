@@ -169,7 +169,7 @@ psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "DROP table mgi
 
 
 
-psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "INSERT INTO mouse_gene_allele (mouse_gene_id,allele_id)
+psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "INSERT INTO mouse_gene_allele (mouse_gene_id,mouse_allele_id)
 select m.id, aa.id from mgi_allele a, mouse_gene m, mouse_allele aa where a.mgi_marker_id=m.mgi_id and a.mgi_allele_id=aa.mgi_id
 UNION select m2.id,aa2.id from mgi_phenotypic_allele p, mouse_gene m2, mouse_allele aa2 where p.mgi_marker_id=m2.mgi_id and p.mgi_allele_id=aa2.mgi_id"
 
