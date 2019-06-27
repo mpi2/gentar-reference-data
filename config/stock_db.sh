@@ -65,7 +65,7 @@ psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "INSERT INTO mo
 psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "INSERT INTO mouse_gene_synonym_relation (mouse_gene_id, mouse_gene_synonym_id) 
 SELECT mouse_gene.id, mouse_gene_synonym.id
 FROM  mouse_gene, mouse_gene_synonym
-WHERE mouse_gene.mgi_id = mouse_gene_synonym.mgi_gene_acc_id"
+WHERE mouse_gene.mgi_gene_acc_id = mouse_gene_synonym.mgi_gene_acc_id"
 
 
 # Create the final version of mgi_mrk_list2
