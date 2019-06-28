@@ -762,7 +762,7 @@ ALTER TABLE public.human_gene OWNER TO ref_admin;
 CREATE TABLE public.human_gene_disease (
     id bigint NOT NULL,
     human_evidence boolean NOT NULL,
-    mgi_id character varying(255),
+    mgi_gene_acc_id character varying(255),
     mouse_evidence boolean NOT NULL,
     human_disease_id bigint NOT NULL,
     human_gene_id bigint NOT NULL
