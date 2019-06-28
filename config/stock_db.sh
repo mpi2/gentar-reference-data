@@ -89,7 +89,7 @@ SELECT symbol,name,hgnc_id,id from hgnc_gene"
 psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "INSERT INTO human_gene_synonym_relation (human_gene_id, human_gene_synonym_id) 
 SELECT human_gene.id, human_gene_synonym.id
 FROM  human_gene, human_gene_synonym
-WHERE human_gene.hgnc_id = human_gene_synonym.hgnc_id"
+WHERE human_gene.hgnc_id = human_gene_synonym.hgnc_acc_id"
 
 # Create the final version of HCOP
 psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "INSERT INTO hcop (mouse_gene_id, human_gene_id,human_entrez_gene,human_ensembl_gene,hgnc_id,human_name,human_symbol,human_chr,human_assert_ids,mouse_entrez_gene,mouse_ensembl_gene,mgi_id,mouse_name,mouse_symbol,mouse_chr,mouse_assert_ids,support)
