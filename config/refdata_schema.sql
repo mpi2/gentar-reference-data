@@ -425,7 +425,7 @@ CREATE TABLE public.mgi_mrk_list2_tmp (
     chr character varying(255),
     feature_type character varying(255),
     marker_type character varying(255),
-    mgi_id character varying(255),
+    mgi_marker_acc_id character varying(255),
     name character varying(255),
     start character varying(255),
     status character varying(255),
@@ -516,14 +516,14 @@ CREATE TABLE public.mgi_phenotypic_allele_tmp (
     allele_attribute character varying(255),
     allele_name text,
     allele_symbol character varying(255),
-    ensembl_id character varying(255),
+    ensembl_acc_id character varying(255),
     gene_name text,
     gene_symbol character varying(255),
-    mgi_allele_id character varying(255),
-    mgi_id character varying(255),
-    mp_ids text,
-    pubmed_id character varying(255),
-    refseq_id character varying(255),
+    mgi_allele_acc_id character varying(255),
+    mgi_marker_acc_id character varying(255),
+    mp_acc_ids text,
+    pubmed_acc_id character varying(255),
+    refseq_acc_id character varying(255),
     synonyms text,
     type character varying(255)
 );
@@ -608,7 +608,8 @@ CREATE TABLE public.mouse_gene (
     ncbi_stop bigint,
     ncbi_strand character varying(255),
     symbol character varying(255),
-    type character varying(255)
+    type character varying(255),
+    subtype character varying(255)
 );
 
 

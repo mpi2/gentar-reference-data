@@ -44,7 +44,7 @@ psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "\copy mgi_gene
 
 # MGI_Mrk_List2_data_load.txt
 
-psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "\copy mgi_mrk_list2_tmp (mgi_id,chr,cM,start,stop,strand,symbol,status,name,marker_type,feature_type,synonyms) FROM '/mnt/MRK_List2.rpt' with (DELIMITER E'\t', NULL '', FORMAT CSV, header TRUE)"
+psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "\copy mgi_mrk_list2_tmp (mgi_marker_acc_id,chr,cM,start,stop,strand,symbol,status,name,marker_type,feature_type,synonyms) FROM '/mnt/MRK_List2.rpt' with (DELIMITER E'\t', NULL '', FORMAT CSV, header TRUE)"
 
 psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "\copy mouse_gene_synonym (mgi_gene_acc_id,synonym) FROM '/mnt/Mrk_synonyms.txt' with (DELIMITER E'\t', NULL '', FORMAT CSV, header FALSE)"
 
@@ -54,7 +54,10 @@ psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "\copy human_ge
 ################################################
 # gene_entries.sql -- CONVERT TO A PSQL command
 
-psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "INSERT INTO mouse_gene (symbol,name,mgi_gene_acc_id,type,genome_build,entrez_gene_acc_id,ncbi_chromosome,ncbi_start,ncbi_stop,ncbi_strand,ensembl_gene_acc_id,ensembl_chromosome,ensembl_start,ensembl_stop,ensembl_strand,mgi_gene_id) SELECT symbol,name,mgi_gene_acc_id,type,genome_build,entrez_gene_acc_id,ncbi_chromosome,ncbi_start,ncbi_stop,ncbi_strand,ensembl_gene_acc_id,ensembl_chromosome,ensembl_start,ensembl_stop,ensembl_strand,id from mgi_gene"
+psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "INSERT INTO mouse_gene (symbol,name,mgi_gene_acc_id,type,genome_build,entrez_gene_acc_id,ncbi_chromosome,ncbi_start,ncbi_stop,ncbi_strand,ensembl_gene_acc_id,ensembl_chromosome,ensembl_start,ensembl_stop,ensembl_strand,mgi_gene_id,subtype) 
+SELECT mg.symbol,mg.name,mg.mgi_gene_acc_id,mg.type,mg.genome_build,mg.entrez_gene_acc_id,mg.ncbi_chromosome,mg.ncbi_start,mg.ncbi_stop,mg.ncbi_strand,mg.ensembl_gene_acc_id,mg.ensembl_chromosome,mg.ensembl_start,mg.ensembl_stop,mg.ensembl_strand,mg.id, mrk.feature_type from mgi_gene mg
+left outer join mgi_mrk_list2_tmp mrk
+ON mg.mgi_gene_acc_id = mrk.mgi_marker_acc_id"
 
 # psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "UPDATE hcop set mouse_gene_id = m.id from mouse_gene m, hcop x where x.mgi_id=m.mgi_id"
 
@@ -72,8 +75,8 @@ WHERE mouse_gene.mgi_gene_acc_id = mouse_gene_synonym.mgi_gene_acc_id"
 # - NOTE: there are different column names compared to mgi_mrk_list2_tmp
 
 psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "INSERT INTO mgi_mrk_list2 (mgi_marker_acc_id,chr,cM,start,stop,strand,symbol,status,name,marker_type,feature_type,synonyms,mouse_gene_id)
-select mrk.mgi_id,mrk.chr,mrk.cM,mrk.start,mrk.stop,mrk.strand,mrk.symbol,mrk.status,mrk.name,mrk.marker_type,mrk.feature_type,mrk.synonyms, mouse_gene.id FROM 
-mgi_mrk_list2_tmp mrk left outer join mouse_gene ON mrk.mgi_id = mouse_gene.mgi_gene_acc_id"
+select mrk.mgi_marker_acc_id,mrk.chr,mrk.cM,mrk.start,mrk.stop,mrk.strand,mrk.symbol,mrk.status,mrk.name,mrk.marker_type,mrk.feature_type,mrk.synonyms, mouse_gene.id FROM 
+mgi_mrk_list2_tmp mrk left outer join mouse_gene ON mrk.mgi_marker_acc_id = mouse_gene.mgi_gene_acc_id"
 
 psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "DROP table mgi_mrk_list2_tmp"
 
@@ -124,14 +127,14 @@ tail -n +14 /mnt/EUCOMM_Allele.rpt | psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER"
 
 tail -n +14 /mnt/KOMP_Allele.rpt | psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "\copy mgi_allele_tmp (project_acc_id,db_name,mgi_allele_acc_id,allele_symbol,allele_name,mgi_marker_acc_id,gene_symbol,cell_line_acc_ids) FROM STDIN with (DELIMITER E'\t', NULL '', FORMAT CSV, header FALSE, ENCODING 'UTF8')"
 
-tail -n +8 /mnt/MGI_PhenotypicAllele.rpt.test.txt | psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "\copy mgi_phenotypic_allele_tmp (mgi_allele_id,allele_symbol,allele_name,type,allele_attribute,pubmed_id,mgi_id,gene_symbol,refseq_id,ensembl_id,mp_ids,synonyms,gene_name) FROM STDIN with (DELIMITER E'\t', NULL '', FORMAT CSV, header FALSE, ENCODING 'UTF8')"
+tail -n +8 /mnt/MGI_PhenotypicAllele.rpt.test.txt | psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "\copy mgi_phenotypic_allele_tmp (mgi_allele_acc_id,allele_symbol,allele_name,type,allele_attribute,pubmed_acc_id,mgi_marker_acc_id,gene_symbol,refseq_acc_id,ensembl_acc_id,mp_acc_ids,synonyms,gene_name) FROM STDIN with (DELIMITER E'\t', NULL '', FORMAT CSV, header FALSE, ENCODING 'UTF8')"
 
 
 psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "INSERT INTO mouse_allele (allele_symbol,mgi_allele_acc_id,name) select a.allele_symbol,a.mgi_allele_acc_id, a.allele_name 
 from 
 mgi_allele_tmp a, mouse_gene m where a.mgi_marker_acc_id=m.mgi_gene_acc_id 
 UNION 
-select p.allele_symbol,p.mgi_allele_id, p.allele_name from mgi_phenotypic_allele_tmp p, mouse_gene m2 where p.mgi_id=m2.mgi_gene_acc_id"
+select p.allele_symbol,p.mgi_allele_acc_id, p.allele_name from mgi_phenotypic_allele_tmp p, mouse_gene m2 where p.mgi_marker_acc_id=m2.mgi_gene_acc_id"
 
 # Create the production version of the mgi_allele table
 # Note: there is a one-to-many relationship between mouse_allele and mgi_allele for MGI:5013777
@@ -151,12 +154,12 @@ psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "DROP table mgi
 # - NOTE: there are different column names compared to mgi_phenotypic_allele_tmp
 
 psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "INSERT INTO mgi_phenotypic_allele (mgi_allele_acc_id,allele_symbol,allele_name,type,allele_attribute,pubmed_acc_id,mgi_marker_acc_id,gene_symbol,refseq_acc_id,ensembl_acc_id,mp_acc_ids,synonyms,gene_name,mouse_allele_id,mouse_gene_id)
-select x.mgi_allele_id,x.allele_symbol,x.allele_name,x.type,x.allele_attribute,x.pubmed_id,x.mgi_id,x.gene_symbol,x.refseq_id,x.ensembl_id,x.mp_ids,x.synonyms,x.gene_name,x.mouse_allele_id, mouse_gene.id
+select x.mgi_allele_acc_id,x.allele_symbol,x.allele_name,x.type,x.allele_attribute,x.pubmed_acc_id,x.mgi_marker_acc_id,x.gene_symbol,x.refseq_acc_id,x.ensembl_acc_id,x.mp_acc_ids,x.synonyms,x.gene_name,x.mouse_allele_id, mouse_gene.id
 FROM
-(select mp.mgi_allele_id,mp.allele_symbol,mp.allele_name,mp.type,mp.allele_attribute,mp.pubmed_id,mp.mgi_id,mp.gene_symbol,mp.refseq_id,mp.ensembl_id,mp.mp_ids,mp.synonyms,mp.gene_name, mouse_allele.id as \"mouse_allele_id\" FROM 
-mgi_phenotypic_allele_tmp mp left outer join mouse_allele ON mp.mgi_allele_id = mouse_allele.mgi_allele_acc_id) x 
+(select mp.mgi_allele_acc_id,mp.allele_symbol,mp.allele_name,mp.type,mp.allele_attribute,mp.pubmed_acc_id,mp.mgi_marker_acc_id,mp.gene_symbol,mp.refseq_acc_id,mp.ensembl_acc_id,mp.mp_acc_ids,mp.synonyms,mp.gene_name, mouse_allele.id as \"mouse_allele_id\" FROM 
+mgi_phenotypic_allele_tmp mp left outer join mouse_allele ON mp.mgi_allele_acc_id = mouse_allele.mgi_allele_acc_id) x 
 left outer join mouse_gene 
-ON x.mgi_id = mouse_gene.mgi_gene_acc_id"
+ON x.mgi_marker_acc_id = mouse_gene.mgi_gene_acc_id"
 
 psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "DROP table mgi_phenotypic_allele_tmp"
 
