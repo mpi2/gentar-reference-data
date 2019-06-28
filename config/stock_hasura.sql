@@ -20,7 +20,7 @@ SET row_security = off;
 -- Name: hdb_catalog; Type: SCHEMA; Schema: -; Owner: hasurauser
 --
 
-CREATE SCHEMA hdb_catalog;
+CREATE SCHEMA IF NOT EXISTS hdb_catalog;
 
 
 ALTER SCHEMA hdb_catalog OWNER TO hasurauser;
@@ -1099,3 +1099,77 @@ ALTER TABLE ONLY hdb_catalog.hdb_relationship
 -- PostgreSQL database dump complete
 --
 
+
+
+--
+-- Name: hdb_schema_update_event hdb_schema_update_event_notifier; Type: TRIGGER; Schema: hdb_catalog; Owner: hasurauser
+--
+
+CREATE TRIGGER hdb_schema_update_event_notifier AFTER INSERT ON hdb_catalog.hdb_schema_update_event FOR EACH ROW EXECUTE PROCEDURE hdb_catalog.hdb_schema_update_event_notifier();
+
+
+--
+-- Name: hdb_table hdb_table_oid_check; Type: TRIGGER; Schema: hdb_catalog; Owner: hasurauser
+--
+
+CREATE TRIGGER hdb_table_oid_check BEFORE INSERT OR UPDATE ON hdb_catalog.hdb_table FOR EACH ROW EXECUTE PROCEDURE hdb_catalog.hdb_table_oid_check();
+
+
+--
+-- Name: event_invocation_logs event_invocation_logs_event_id_fkey; Type: FK CONSTRAINT; Schema: hdb_catalog; Owner: hasurauser
+--
+
+ALTER TABLE ONLY hdb_catalog.event_invocation_logs
+    ADD CONSTRAINT event_invocation_logs_event_id_fkey FOREIGN KEY (event_id) REFERENCES hdb_catalog.event_log(id);
+
+
+--
+-- Name: event_triggers event_triggers_schema_name_fkey; Type: FK CONSTRAINT; Schema: hdb_catalog; Owner: hasurauser
+--
+
+ALTER TABLE ONLY hdb_catalog.event_triggers
+    ADD CONSTRAINT event_triggers_schema_name_fkey FOREIGN KEY (schema_name, table_name) REFERENCES hdb_catalog.hdb_table(table_schema, table_name) ON UPDATE CASCADE;
+
+
+--
+-- Name: hdb_allowlist hdb_allowlist_collection_name_fkey; Type: FK CONSTRAINT; Schema: hdb_catalog; Owner: hasurauser
+--
+
+ALTER TABLE ONLY hdb_catalog.hdb_allowlist
+    ADD CONSTRAINT hdb_allowlist_collection_name_fkey FOREIGN KEY (collection_name) REFERENCES hdb_catalog.hdb_query_collection(collection_name);
+
+
+--
+-- Name: hdb_permission hdb_permission_table_schema_fkey; Type: FK CONSTRAINT; Schema: hdb_catalog; Owner: hasurauser
+--
+
+ALTER TABLE ONLY hdb_catalog.hdb_permission
+    ADD CONSTRAINT hdb_permission_table_schema_fkey FOREIGN KEY (table_schema, table_name) REFERENCES hdb_catalog.hdb_table(table_schema, table_name) ON UPDATE CASCADE;
+
+
+--
+-- Name: hdb_relationship hdb_relationship_table_schema_fkey; Type: FK CONSTRAINT; Schema: hdb_catalog; Owner: hasurauser
+--
+
+ALTER TABLE ONLY hdb_catalog.hdb_relationship
+    ADD CONSTRAINT hdb_relationship_table_schema_fkey FOREIGN KEY (table_schema, table_name) REFERENCES hdb_catalog.hdb_table(table_schema, table_name) ON UPDATE CASCADE;
+
+
+--
+-- PostgreSQL database dump complete
+--
+
+-- 
+-- Chnage the access to hdb_catalog tables
+-- 
+
+REVOKE ALL ON hdb_catalog.hdb_table FROM hasurauser;
+GRANT SELECT ON hdb_catalog.hdb_table TO hasurauser;
+
+
+REVOKE ALL ON hdb_catalog.hdb_relationship FROM hasurauser;
+GRANT SELECT ON hdb_catalog.hdb_relationship TO hasurauser;
+
+
+REVOKE ALL ON hdb_catalog.hdb_permission FROM hasurauser;
+GRANT SELECT ON hdb_catalog.hdb_permission TO hasurauser;
