@@ -48,6 +48,7 @@ stages:
    - validate
    - build
    - test
+   - deploy
 
 
 #
@@ -242,3 +243,17 @@ build_image:
         name: "database-${CI_JOB_ID}"
         paths:
             - ${MOUNT_POINT}
+
+deploy:
+  stage: deploy
+  image: dtzar/helm-kubectl
+  script:
+    - kubectl config set-cluster k8s --server="${SERVER}"
+    - kubectl config set clusters.k8s.certificate-authority-data ${CERTIFICATE_AUTHORITY_DATA}
+    - kubectl config set-credentials gitlab --token="${USER_TOKEN}"
+    - kubectl config set-context default --cluster=k8s --user=gitlab
+    - kubectl config use-context default
+    - sed -i "s/latest/${NOW}/g" kube/database/refdata-database-deployment.yaml
+    - kubectl apply -f kube/database/refdata-database-deployment.yaml
+    - kubectl --record deployment.apps/reference-database -n mpi2-reference-data set image deployment.v1.apps/reference-database reference-database-container=rwilsonebi/reference-data-db:${NOW}
+    - kubectl replace --force=true -f kube/hasura/hasura-deployment.yaml -n mpi2-reference-data
