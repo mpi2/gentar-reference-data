@@ -288,14 +288,14 @@ ALTER SEQUENCE public.mgi_allele_tmp_id_seq OWNED BY public.mgi_allele_tmp.id;
 CREATE TABLE public.mgi_disease (
     id bigint NOT NULL,
     disease_name character varying(255),
-    doid character varying(255),
-    entrez_id bigint,
-    homologene_id bigint,
-    mgi_id character varying(255),
-    omim_ids text,
+    do_acc_id character varying(255),
+    entrez_acc_id bigint,
+    homologene_acc_id bigint,
+    mgi_gene_acc_id character varying(255),
+    omim_acc_ids text,
     organism_name character varying(255),
     symbol character varying(255),
-    taxon_id bigint
+    taxon_acc_id bigint
 );
 
 
@@ -329,13 +329,13 @@ ALTER SEQUENCE public.mgi_disease_id_seq OWNED BY public.mgi_disease.id;
 CREATE TABLE public.mgi_gene (
     id bigint NOT NULL,
     ensembl_chromosome character varying(255),
-    ensembl_gene_id character varying(255),
+    ensembl_gene_acc_id character varying(255),
     ensembl_start bigint,
     ensembl_stop bigint,
     ensembl_strand character varying(255),
-    entrez_gene_id bigint,
+    entrez_gene_acc_id bigint,
     genome_build character varying(255),
-    mgi_id character varying(255),
+    mgi_gene_acc_id character varying(255),
     name character varying(255),
     ncbi_chromosome character varying(255),
     ncbi_start bigint,
