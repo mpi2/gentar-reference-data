@@ -92,7 +92,7 @@ FROM  human_gene, human_gene_synonym
 WHERE human_gene.hgnc_acc_id = human_gene_synonym.hgnc_acc_id"
 
 # Create the final version of HCOP
-psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "INSERT INTO hcop (mouse_gene_id, human_gene_id,human_entrez_gene,human_ensembl_gene,hgnc_id,human_name,human_symbol,human_chr,human_assert_ids,mouse_entrez_gene,mouse_ensembl_gene,mgi_id,mouse_name,mouse_symbol,mouse_chr,mouse_assert_ids,support)
+psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "INSERT INTO hcop (mouse_gene_id, human_gene_id,human_entrez_gene_acc_id,human_ensembl_gene_acc_id,hgnc_acc_id,human_name,human_symbol,human_chr,human_assert_acc_ids,mouse_entrez_gene_acc_id,mouse_ensembl_gene_acc_id,mgi_gene_acc_id,mouse_name,mouse_symbol,mouse_chr,mouse_assert_acc_ids,support)
 select a.mouse_gene_id, human_gene.id as \"human_gene_id\", a.human_entrez_gene,a.human_ensembl_gene,a.hgnc_id,a.human_name,a.human_symbol,a.human_chr,a.human_assert_ids,a.mouse_entrez_gene,a.mouse_ensembl_gene,a.mgi_id,a.mouse_name,a.mouse_symbol,a.mouse_chr,a.mouse_assert_ids,a.support from (select mouse_gene.id as \"mouse_gene_id\", h.human_entrez_gene,h.human_ensembl_gene,h.hgnc_id,h.human_name,h.human_symbol,h.human_chr,h.human_assert_ids,h.mouse_entrez_gene,h.mouse_ensembl_gene,h.mgi_id,h.mouse_name,h.mouse_symbol,h.mouse_chr,h.mouse_assert_ids,h.support from hcop_tmp h left outer join mouse_gene ON h.mgi_id=mouse_gene.mgi_gene_acc_id) as a left outer join human_gene ON a.hgnc_id=human_gene.hgnc_acc_id"
 
 psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "DROP TABLE hcop_tmp"
@@ -100,8 +100,8 @@ psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "DROP TABLE hco
 
 psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "INSERT INTO ortholog (support, support_count,human_gene_id,mouse_gene_id)
 select array_to_string(array( select distinct unnest(string_to_array(support, ','))),',') as list, array_length(array( select distinct unnest(string_to_array(support, ','))),1) as count, human_gene.id, mouse_gene.id from hcop h, human_gene, mouse_gene 
-WHERE h.hgnc_id = human_gene.hgnc_acc_id and 
-h.mgi_id = mouse_gene.mgi_gene_acc_id
+WHERE h.hgnc_acc_id = human_gene.hgnc_acc_id and 
+h.mgi_gene_acc_id = mouse_gene.mgi_gene_acc_id
 GROUP BY list,count,human_gene.id, mouse_gene.id
 order by count desc"
 
