@@ -700,7 +700,7 @@ ALTER TABLE public.mouse_gene_synonym_relation OWNER TO ref_admin;
 CREATE TABLE public.human_disease (
     id bigint NOT NULL,
     mgi_disease_id bigint NOT NULL,
-    do_id character varying(255),
+    do_acc_id character varying(255),
     name character varying(255)
 );
 
