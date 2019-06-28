@@ -118,31 +118,31 @@ psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "\copy strain (
 
 # MGI_Allele_data_load.txt
 
-tail -n +14 /mnt/NorCOMM_Allele.rpt | psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "\copy mgi_allele_tmp (project_id,db_name,mgi_allele_id,allele_symbol,allele_name,mgi_id,gene_symbol,cell_line_ids) FROM STDIN with (DELIMITER E'\t', NULL '', FORMAT CSV, header FALSE, ENCODING 'UTF8')"
+tail -n +14 /mnt/NorCOMM_Allele.rpt | psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "\copy mgi_allele_tmp (project_acc_id,db_name,mgi_allele_acc_id,allele_symbol,allele_name,mgi_marker_acc_id,gene_symbol,cell_line_acc_ids) FROM STDIN with (DELIMITER E'\t', NULL '', FORMAT CSV, header FALSE, ENCODING 'UTF8')"
 
-tail -n +14 /mnt/EUCOMM_Allele.rpt | psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "\copy mgi_allele_tmp (project_id,db_name,mgi_allele_id,allele_symbol,allele_name,mgi_id,gene_symbol,cell_line_ids) FROM STDIN with (DELIMITER E'\t', NULL '', FORMAT CSV, header FALSE, ENCODING 'UTF8')"
+tail -n +14 /mnt/EUCOMM_Allele.rpt | psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "\copy mgi_allele_tmp (project_acc_id,db_name,mgi_allele_acc_id,allele_symbol,allele_name,mgi_marker_acc_id,gene_symbol,cell_line_acc_ids) FROM STDIN with (DELIMITER E'\t', NULL '', FORMAT CSV, header FALSE, ENCODING 'UTF8')"
 
-tail -n +14 /mnt/KOMP_Allele.rpt | psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "\copy mgi_allele_tmp (project_id,db_name,mgi_allele_id,allele_symbol,allele_name,mgi_id,gene_symbol,cell_line_ids) FROM STDIN with (DELIMITER E'\t', NULL '', FORMAT CSV, header FALSE, ENCODING 'UTF8')"
+tail -n +14 /mnt/KOMP_Allele.rpt | psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "\copy mgi_allele_tmp (project_acc_id,db_name,mgi_allele_acc_id,allele_symbol,allele_name,mgi_marker_acc_id,gene_symbol,cell_line_acc_ids) FROM STDIN with (DELIMITER E'\t', NULL '', FORMAT CSV, header FALSE, ENCODING 'UTF8')"
 
 tail -n +8 /mnt/MGI_PhenotypicAllele.rpt.test.txt | psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "\copy mgi_phenotypic_allele_tmp (mgi_allele_id,allele_symbol,allele_name,type,allele_attribute,pubmed_id,mgi_id,gene_symbol,refseq_id,ensembl_id,mp_ids,synonyms,gene_name) FROM STDIN with (DELIMITER E'\t', NULL '', FORMAT CSV, header FALSE, ENCODING 'UTF8')"
 
 
-psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "INSERT INTO mouse_allele (allele_symbol,mgi_allele_acc_id,name) select a.allele_symbol,a.mgi_allele_id, a.allele_name 
+psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "INSERT INTO mouse_allele (allele_symbol,mgi_allele_acc_id,name) select a.allele_symbol,a.mgi_allele_acc_id, a.allele_name 
 from 
-mgi_allele_tmp a, mouse_gene m where a.mgi_id=m.mgi_gene_acc_id 
+mgi_allele_tmp a, mouse_gene m where a.mgi_marker_acc_id=m.mgi_gene_acc_id 
 UNION 
 select p.allele_symbol,p.mgi_allele_id, p.allele_name from mgi_phenotypic_allele_tmp p, mouse_gene m2 where p.mgi_id=m2.mgi_gene_acc_id"
 
 # Create the production version of the mgi_allele table
 # Note: there is a one-to-many relationship between mouse_allele and mgi_allele for MGI:5013777
 
-psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "INSERT INTO mgi_allele (project_id,db_name,mgi_allele_id,allele_symbol,allele_name,mgi_marker_id,gene_symbol,cell_line_ids,mouse_allele_id,mouse_gene_id)
-select x.project_id,x.db_name,x.mgi_allele_id,x.allele_symbol,x.allele_name,x.mgi_id,x.gene_symbol,x.cell_line_ids,x.mouse_allele_id, mouse_gene.id
+psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "INSERT INTO mgi_allele (project_acc_id,db_name,mgi_allele_acc_id,allele_symbol,allele_name,mgi_marker_acc_id,gene_symbol,cell_line_acc_ids,mouse_allele_id,mouse_gene_id)
+select x.project_acc_id,x.db_name,x.mgi_allele_acc_id,x.allele_symbol,x.allele_name,x.mgi_marker_acc_id,x.gene_symbol,x.cell_line_acc_ids,x.mouse_allele_id, mouse_gene.id
 FROM
-(select ma.project_id,ma.db_name,ma.mgi_allele_id,ma.allele_symbol,ma.allele_name,ma.mgi_id,ma.gene_symbol,ma.cell_line_ids, mouse_allele.id as \"mouse_allele_id\" FROM 
-mgi_allele_tmp ma left outer join mouse_allele ON ma.mgi_allele_id = mouse_allele.mgi_allele_acc_id) x
+(select ma.project_acc_id,ma.db_name,ma.mgi_allele_acc_id,ma.allele_symbol,ma.allele_name,ma.mgi_marker_acc_id,ma.gene_symbol,ma.cell_line_acc_ids, mouse_allele.id as \"mouse_allele_id\" FROM 
+mgi_allele_tmp ma left outer join mouse_allele ON ma.mgi_allele_acc_id = mouse_allele.mgi_allele_acc_id) x
 left outer join mouse_gene
-ON x.mgi_id = mouse_gene.mgi_gene_acc_id"
+ON x.mgi_marker_acc_id = mouse_gene.mgi_gene_acc_id"
 
 psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "DROP table mgi_allele_tmp"
 
@@ -173,7 +173,7 @@ psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "DROP table mgi
 
 
 psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "INSERT INTO mouse_gene_allele (mouse_gene_id,mouse_allele_id)
-select m.id, aa.id from mgi_allele a, mouse_gene m, mouse_allele aa where a.mgi_marker_id=m.mgi_gene_acc_id and a.mgi_allele_id=aa.mgi_allele_acc_id
+select m.id, aa.id from mgi_allele a, mouse_gene m, mouse_allele aa where a.mgi_marker_acc_id=m.mgi_gene_acc_id and a.mgi_allele_acc_id=aa.mgi_allele_acc_id
 UNION select m2.id,aa2.id from mgi_phenotypic_allele p, mouse_gene m2, mouse_allele aa2 where p.mgi_marker_acc_id=m2.mgi_gene_acc_id and p.mgi_allele_acc_id=aa2.mgi_allele_acc_id"
 
 ## Run test counts -- see MGI_Allele_data_load.txt

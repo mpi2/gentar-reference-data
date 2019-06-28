@@ -208,12 +208,12 @@ CREATE TABLE public.mgi_allele (
     mouse_gene_id bigint,
     allele_name text,
     allele_symbol character varying(255),
-    cell_line_ids text,
+    cell_line_acc_ids text,
     db_name character varying(255),
     gene_symbol character varying(255),
-    mgi_allele_id character varying(255),
-    mgi_marker_id character varying(255),
-    project_id character varying(255)
+    mgi_allele_acc_id character varying(255),
+    mgi_marker_acc_id character varying(255),
+    project_acc_id character varying(255)
 );
 
 
@@ -249,12 +249,12 @@ CREATE TABLE public.mgi_allele_tmp (
     id bigint NOT NULL,
     allele_name text,
     allele_symbol character varying(255),
-    cell_line_ids text,
+    cell_line_acc_ids text,
     db_name character varying(255),
     gene_symbol character varying(255),
-    mgi_allele_id character varying(255),
-    mgi_id character varying(255),
-    project_id character varying(255)
+    mgi_allele_acc_id character varying(255),
+    mgi_marker_acc_id character varying(255),
+    project_acc_id character varying(255)
 );
 
 
