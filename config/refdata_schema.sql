@@ -593,7 +593,6 @@ ALTER SEQUENCE public.mouse_allele_id_seq OWNED BY public.mouse_allele.id;
 
 CREATE TABLE public.mouse_gene (
     id bigint NOT NULL,
-    mgi_gene_id bigint NOT NULL,
     ensembl_chromosome character varying(255),
     ensembl_gene_acc_id character varying(255),
     ensembl_start bigint,
@@ -1340,20 +1339,6 @@ ALTER TABLE ONLY public.mgi_phenotypic_allele
 
 ALTER TABLE ONLY public.mgi_phenotypic_allele
     ADD CONSTRAINT fk825iejet18j033e8a67r52l8 FOREIGN KEY (mouse_gene_id) REFERENCES public.mouse_gene(id);
-
-
-
---
--- Name: mouse_gene fk457iejet18j033e8a67r7628; Type: FK CONSTRAINT; Schema: public; Owner: ref_admin
---
-
-ALTER TABLE ONLY public.mouse_gene
-    ADD CONSTRAINT mouse_gene_mgi_gene_id_unique UNIQUE (mgi_gene_id);
-
-ALTER TABLE ONLY public.mouse_gene
-    ADD CONSTRAINT fk457iejet18j033e8a67r7628 FOREIGN KEY (mgi_gene_id) REFERENCES public.mgi_gene(id);
-
-
 
 
 

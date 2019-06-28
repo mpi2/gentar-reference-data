@@ -51,19 +51,15 @@ psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "\copy mouse_ge
 
 psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "\copy human_gene_synonym (hgnc_acc_id,synonym) FROM '/mnt/HGNC_synonyms.txt' with (DELIMITER E'\t', NULL '', FORMAT CSV, header FALSE)"
 
-################################################
-# gene_entries.sql -- CONVERT TO A PSQL command
 
-psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "INSERT INTO mouse_gene (symbol,name,mgi_gene_acc_id,type,genome_build,entrez_gene_acc_id,ncbi_chromosome,ncbi_start,ncbi_stop,ncbi_strand,ensembl_gene_acc_id,ensembl_chromosome,ensembl_start,ensembl_stop,ensembl_strand,mgi_gene_id,subtype) 
-SELECT mg.symbol,mg.name,mg.mgi_gene_acc_id,mg.type,mg.genome_build,mg.entrez_gene_acc_id,mg.ncbi_chromosome,mg.ncbi_start,mg.ncbi_stop,mg.ncbi_strand,mg.ensembl_gene_acc_id,mg.ensembl_chromosome,mg.ensembl_start,mg.ensembl_stop,mg.ensembl_strand,mg.id, mrk.feature_type from mgi_gene mg
+psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "INSERT INTO mouse_gene (symbol,name,mgi_gene_acc_id,type,genome_build,entrez_gene_acc_id,ncbi_chromosome,ncbi_start,ncbi_stop,ncbi_strand,ensembl_gene_acc_id,ensembl_chromosome,ensembl_start,ensembl_stop,ensembl_strand,subtype) 
+SELECT mg.symbol,mg.name,mg.mgi_gene_acc_id,mg.type,mg.genome_build,mg.entrez_gene_acc_id,mg.ncbi_chromosome,mg.ncbi_start,mg.ncbi_stop,mg.ncbi_strand,mg.ensembl_gene_acc_id,mg.ensembl_chromosome,mg.ensembl_start,mg.ensembl_stop,mg.ensembl_strand, mrk.feature_type from mgi_gene mg
 left outer join mgi_mrk_list2_tmp mrk
 ON mg.mgi_gene_acc_id = mrk.mgi_marker_acc_id"
 
-# psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "UPDATE hcop set mouse_gene_id = m.id from mouse_gene m, hcop x where x.mgi_id=m.mgi_id"
+psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "DROP table mgi_gene"
 
 
-
-# psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "UPDATE mouse_gene_synonym set mgi_mrk_list2_id = x.id from mouse_gene_synonym m, mgi_mrk_list2 x where m.mgi_id=x.mgi_id"
 
 psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "INSERT INTO mouse_gene_synonym_relation (mouse_gene_id, mouse_gene_synonym_id) 
 SELECT mouse_gene.id, mouse_gene_synonym.id
@@ -71,14 +67,12 @@ FROM  mouse_gene, mouse_gene_synonym
 WHERE mouse_gene.mgi_gene_acc_id = mouse_gene_synonym.mgi_gene_acc_id"
 
 
-# Create the final version of mgi_mrk_list2
-# - NOTE: there are different column names compared to mgi_mrk_list2_tmp
+# Create the final version of mgi_mrk_list2 - This is not needed apart from to provide mouse_gene_synonyms and the feture_type of genes.
 
-psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "INSERT INTO mgi_mrk_list2 (mgi_marker_acc_id,chr,cM,start,stop,strand,symbol,status,name,marker_type,feature_type,synonyms,mouse_gene_id)
-select mrk.mgi_marker_acc_id,mrk.chr,mrk.cM,mrk.start,mrk.stop,mrk.strand,mrk.symbol,mrk.status,mrk.name,mrk.marker_type,mrk.feature_type,mrk.synonyms, mouse_gene.id FROM 
-mgi_mrk_list2_tmp mrk left outer join mouse_gene ON mrk.mgi_marker_acc_id = mouse_gene.mgi_gene_acc_id"
+# psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "INSERT INTO mgi_mrk_list2 (mgi_marker_acc_id,chr,cM,start,stop,strand,symbol,status,name,marker_type,feature_type,synonyms,mouse_gene_id) select mrk.mgi_marker_acc_id,mrk.chr,mrk.cM,mrk.start,mrk.stop,mrk.strand,mrk.symbol,mrk.status,mrk.name,mrk.marker_type,mrk.feature_type,mrk.synonyms, mouse_gene.id FROM mgi_mrk_list2_tmp mrk left outer join mouse_gene ON mrk.mgi_marker_acc_id = mouse_gene.mgi_gene_acc_id"
 
 psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "DROP table mgi_mrk_list2_tmp"
+psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "DROP table mgi_mrk_list2"
 
 
 
@@ -86,13 +80,13 @@ psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "DROP table mgi
 psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "INSERT INTO human_gene (symbol,name,hgnc_acc_id,hgnc_gene_id) 
 SELECT symbol,name,hgnc_acc_id,id from hgnc_gene"
 
-# psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "UPDATE human_gene set hcop_id = x.id from human_gene h, hcop x where h.hgnc_id = x.hgnc_id"
-
 
 psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "INSERT INTO human_gene_synonym_relation (human_gene_id, human_gene_synonym_id) 
 SELECT human_gene.id, human_gene_synonym.id
 FROM  human_gene, human_gene_synonym
 WHERE human_gene.hgnc_acc_id = human_gene_synonym.hgnc_acc_id"
+
+
 
 # Create the final version of HCOP
 psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "INSERT INTO hcop (mouse_gene_id, human_gene_id,human_entrez_gene_acc_id,human_ensembl_gene_acc_id,hgnc_acc_id,human_name,human_symbol,human_chr,human_assert_acc_ids,mouse_entrez_gene_acc_id,mouse_ensembl_gene_acc_id,mgi_gene_acc_id,mouse_name,mouse_symbol,mouse_chr,mouse_assert_acc_ids,support)
@@ -101,14 +95,13 @@ select a.mouse_gene_id, human_gene.id as \"human_gene_id\", a.human_entrez_gene_
 psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "DROP TABLE hcop_tmp"
 
 
+
 psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "INSERT INTO ortholog (support, support_count,human_gene_id,mouse_gene_id)
 select array_to_string(array( select distinct unnest(string_to_array(support, ','))),',') as list, array_length(array( select distinct unnest(string_to_array(support, ','))),1) as count, human_gene.id, mouse_gene.id from hcop h, human_gene, mouse_gene 
 WHERE h.hgnc_acc_id = human_gene.hgnc_acc_id and 
 h.mgi_gene_acc_id = mouse_gene.mgi_gene_acc_id
 GROUP BY list,count,human_gene.id, mouse_gene.id
 order by count desc"
-
-###################################################
 
 
 
@@ -165,21 +158,10 @@ psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "DROP table mgi
 
 
 
-
-# Enter the foreign key ids:
-#psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "UPDATE mouse_allele set mgi_allele_id = a.id from mgi_allele a, mouse_allele aa where a.mgi_allele_id=aa.mgi_id and a.allele_symbol=aa.allele_symbol"
-
-#psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "UPDATE mouse_allele set mgi_phenotypic_allele_id = a.id  from mgi_phenotypic_allele a, mouse_allele aa where a.mgi_id=aa.mgi_allele_id and a.allele_symbol=aa.allele_symbol"
-
-#psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "INSERT INTO mouse_allele (allele_symbol,mgi_id,name,mgi_allele_id,mgi_phenotypic_allele_id) select r.allele_symbol,r.mgi_allele_id,r.allele_name,r.mgi_allele_primary_key,r.mgi_phenotypic_allele_primary_key from (((select a.allele_symbol,a.mgi_allele_id, a.allele_name from mgi_allele a, mouse_gene m where a.mgi_id=m.mgi_id UNION select p.allele_symbol,p.mgi_allele_id, p.allele_name from mgi_phenotypic_allele p, mouse_gene m2 where p.mgi_id=m2.mgi_id) as x LEFT OUTER JOIN (select aa.id as \"mgi_allele_primary_key\", aa.mgi_allele_id as \"mgi_allele_mgi_allele_id\" from mgi_allele aa, mouse_gene mm where aa.mgi_id=mm.mgi_id) as y ON x.mgi_allele_id = y.mgi_allele_mgi_allele_id) as xx LEFT OUTER JOIN (select pp.id as \"mgi_phenotypic_allele_primary_key\", pp.mgi_allele_id as \"mgi_phenotypic_allele_mgi_allele_id\" from mgi_phenotypic_allele pp, mouse_gene m4 where pp.mgi_id=m4.mgi_id) as z ON xx.mgi_allele_id = z.mgi_phenotypic_allele_mgi_allele_id) as r group by r.allele_symbol,r.mgi_allele_id,r.allele_name,r.mgi_allele_primary_key,r.mgi_phenotypic_allele_primary_key"
-
-
-
 psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "INSERT INTO mouse_gene_allele (mouse_gene_id,mouse_allele_id)
 select m.id, aa.id from mgi_allele a, mouse_gene m, mouse_allele aa where a.mgi_marker_acc_id=m.mgi_gene_acc_id and a.mgi_allele_acc_id=aa.mgi_allele_acc_id
 UNION select m2.id,aa2.id from mgi_phenotypic_allele p, mouse_gene m2, mouse_allele aa2 where p.mgi_marker_acc_id=m2.mgi_gene_acc_id and p.mgi_allele_acc_id=aa2.mgi_allele_acc_id"
 
-## Run test counts -- see MGI_Allele_data_load.txt
 
 
 # MGI_Disease_data_load.txt
