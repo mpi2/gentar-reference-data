@@ -81,7 +81,7 @@ psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "DROP table mgi
 
 
 psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "INSERT INTO human_gene (symbol,name,hgnc_acc_id,hgnc_gene_id) 
-SELECT symbol,name,hgnc_id,id from hgnc_gene"
+SELECT symbol,name,hgnc_acc_id,id from hgnc_gene"
 
 # psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "UPDATE human_gene set hcop_id = x.id from human_gene h, hcop x where h.hgnc_id = x.hgnc_id"
 
