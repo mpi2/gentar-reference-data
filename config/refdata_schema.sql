@@ -819,7 +819,7 @@ ALTER SEQUENCE public.human_gene_id_seq OWNED BY public.human_gene.id;
 
 CREATE TABLE public.human_gene_synonym (
     id bigint NOT NULL,
-    hgnc_id character varying(255),
+    hgnc_acc_id character varying(255),
     synonym character varying(255)
 );
 
