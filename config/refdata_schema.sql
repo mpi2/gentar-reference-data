@@ -747,7 +747,7 @@ ALTER TABLE public.human_disease_omim OWNER TO ref_admin;
 CREATE TABLE public.human_gene (
     id bigint NOT NULL,
     hgnc_gene_id bigint NOT NULL,
-    hgnc_id character varying(255) NOT NULL,
+    hgnc_acc_id character varying(255) NOT NULL,
     name character varying(255) NOT NULL,
     symbol character varying(255) NOT NULL
 );

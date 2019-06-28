@@ -80,7 +80,7 @@ psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "DROP table mgi
 
 
 
-psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "INSERT INTO human_gene (symbol,name,hgnc_id,hgnc_gene_id) 
+psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "INSERT INTO human_gene (symbol,name,hgnc_acc_id,hgnc_gene_id) 
 SELECT symbol,name,hgnc_id,id from hgnc_gene"
 
 # psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "UPDATE human_gene set hcop_id = x.id from human_gene h, hcop x where h.hgnc_id = x.hgnc_id"
@@ -89,18 +89,18 @@ SELECT symbol,name,hgnc_id,id from hgnc_gene"
 psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "INSERT INTO human_gene_synonym_relation (human_gene_id, human_gene_synonym_id) 
 SELECT human_gene.id, human_gene_synonym.id
 FROM  human_gene, human_gene_synonym
-WHERE human_gene.hgnc_id = human_gene_synonym.hgnc_acc_id"
+WHERE human_gene.hgnc_acc_id = human_gene_synonym.hgnc_acc_id"
 
 # Create the final version of HCOP
 psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "INSERT INTO hcop (mouse_gene_id, human_gene_id,human_entrez_gene,human_ensembl_gene,hgnc_id,human_name,human_symbol,human_chr,human_assert_ids,mouse_entrez_gene,mouse_ensembl_gene,mgi_id,mouse_name,mouse_symbol,mouse_chr,mouse_assert_ids,support)
-select a.mouse_gene_id, human_gene.id as \"human_gene_id\", a.human_entrez_gene,a.human_ensembl_gene,a.hgnc_id,a.human_name,a.human_symbol,a.human_chr,a.human_assert_ids,a.mouse_entrez_gene,a.mouse_ensembl_gene,a.mgi_id,a.mouse_name,a.mouse_symbol,a.mouse_chr,a.mouse_assert_ids,a.support from (select mouse_gene.id as \"mouse_gene_id\", h.human_entrez_gene,h.human_ensembl_gene,h.hgnc_id,h.human_name,h.human_symbol,h.human_chr,h.human_assert_ids,h.mouse_entrez_gene,h.mouse_ensembl_gene,h.mgi_id,h.mouse_name,h.mouse_symbol,h.mouse_chr,h.mouse_assert_ids,h.support from hcop_tmp h left outer join mouse_gene ON h.mgi_id=mouse_gene.mgi_gene_acc_id) as a left outer join human_gene ON a.hgnc_id=human_gene.hgnc_id"
+select a.mouse_gene_id, human_gene.id as \"human_gene_id\", a.human_entrez_gene,a.human_ensembl_gene,a.hgnc_id,a.human_name,a.human_symbol,a.human_chr,a.human_assert_ids,a.mouse_entrez_gene,a.mouse_ensembl_gene,a.mgi_id,a.mouse_name,a.mouse_symbol,a.mouse_chr,a.mouse_assert_ids,a.support from (select mouse_gene.id as \"mouse_gene_id\", h.human_entrez_gene,h.human_ensembl_gene,h.hgnc_id,h.human_name,h.human_symbol,h.human_chr,h.human_assert_ids,h.mouse_entrez_gene,h.mouse_ensembl_gene,h.mgi_id,h.mouse_name,h.mouse_symbol,h.mouse_chr,h.mouse_assert_ids,h.support from hcop_tmp h left outer join mouse_gene ON h.mgi_id=mouse_gene.mgi_gene_acc_id) as a left outer join human_gene ON a.hgnc_id=human_gene.hgnc_acc_id"
 
 psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "DROP TABLE hcop_tmp"
 
 
 psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "INSERT INTO ortholog (support, support_count,human_gene_id,mouse_gene_id)
 select array_to_string(array( select distinct unnest(string_to_array(support, ','))),',') as list, array_length(array( select distinct unnest(string_to_array(support, ','))),1) as count, human_gene.id, mouse_gene.id from hcop h, human_gene, mouse_gene 
-WHERE h.hgnc_id = human_gene.hgnc_id and 
+WHERE h.hgnc_id = human_gene.hgnc_acc_id and 
 h.mgi_id = mouse_gene.mgi_gene_acc_id
 GROUP BY list,count,human_gene.id, mouse_gene.id
 order by count desc"
@@ -195,10 +195,10 @@ select hd.id, ot.id from human_disease hd, omim_table ot, mgi_disease m, (select
 
 
 psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "INSERT INTO human_gene_disease (human_gene_id, human_disease_id, human_evidence, mgi_gene_acc_id, mouse_evidence)
-(select a.gene_id,a.disease_id,True,mgi_gene_acc_id, True from (select h.id as \"gene_id\", hd.id as \"disease_id\" from human_gene h, hgnc_gene hg, mgi_disease m, human_disease hd where m.entrez_acc_id = hg.entrez_id and hg.hgnc_id = h.hgnc_id and m.taxon_acc_id=9606 and m.do_acc_id = hd.do_id) a INNER JOIN (select h.id as \"gene_id\", hd.id as \"disease_id\", m.mgi_gene_acc_id from human_gene h, mouse_gene mg, ortholog o, mgi_disease m, human_disease hd where m.mgi_gene_acc_id = mg.mgi_gene_acc_id and mg.id = o.mouse_gene_id and o.support_count > 4 and o.human_gene_id = h.id and m.taxon_acc_id=10090 and m.do_acc_id = hd.do_id) b ON a.gene_id = b.gene_id and a.disease_id = b.disease_id)
+(select a.gene_id,a.disease_id,True,mgi_gene_acc_id, True from (select h.id as \"gene_id\", hd.id as \"disease_id\" from human_gene h, hgnc_gene hg, mgi_disease m, human_disease hd where m.entrez_acc_id = hg.entrez_id and hg.hgnc_id = h.hgnc_acc_id and m.taxon_acc_id=9606 and m.do_acc_id = hd.do_id) a INNER JOIN (select h.id as \"gene_id\", hd.id as \"disease_id\", m.mgi_gene_acc_id from human_gene h, mouse_gene mg, ortholog o, mgi_disease m, human_disease hd where m.mgi_gene_acc_id = mg.mgi_gene_acc_id and mg.id = o.mouse_gene_id and o.support_count > 4 and o.human_gene_id = h.id and m.taxon_acc_id=10090 and m.do_acc_id = hd.do_id) b ON a.gene_id = b.gene_id and a.disease_id = b.disease_id)
  UNION 
-(select a.gene_id,a.disease_id,True,NULL as mgi_gene_acc_id, False from (select h.id as \"gene_id\", hd.id as \"disease_id\" from human_gene h, hgnc_gene hg, mgi_disease m, human_disease hd where m.entrez_acc_id = hg.entrez_id and hg.hgnc_id = h.hgnc_id and m.taxon_acc_id=9606 and m.do_acc_id = hd.do_id) a LEFT OUTER JOIN (select h.id as \"gene_id\", hd.id as \"disease_id\", m.mgi_gene_acc_id from human_gene h, mouse_gene mg, ortholog o, mgi_disease m, human_disease hd where m.mgi_gene_acc_id = mg.mgi_gene_acc_id and mg.id = o.mouse_gene_id and o.support_count > 4 and o.human_gene_id = h.id and m.taxon_acc_id=10090 and m.do_acc_id = hd.do_id) b ON a.gene_id = b.gene_id and a.disease_id = b.disease_id WHERE b.gene_id IS NULL and b.disease_id IS NULL)
+(select a.gene_id,a.disease_id,True,NULL as mgi_gene_acc_id, False from (select h.id as \"gene_id\", hd.id as \"disease_id\" from human_gene h, hgnc_gene hg, mgi_disease m, human_disease hd where m.entrez_acc_id = hg.entrez_id and hg.hgnc_id = h.hgnc_acc_id and m.taxon_acc_id=9606 and m.do_acc_id = hd.do_id) a LEFT OUTER JOIN (select h.id as \"gene_id\", hd.id as \"disease_id\", m.mgi_gene_acc_id from human_gene h, mouse_gene mg, ortholog o, mgi_disease m, human_disease hd where m.mgi_gene_acc_id = mg.mgi_gene_acc_id and mg.id = o.mouse_gene_id and o.support_count > 4 and o.human_gene_id = h.id and m.taxon_acc_id=10090 and m.do_acc_id = hd.do_id) b ON a.gene_id = b.gene_id and a.disease_id = b.disease_id WHERE b.gene_id IS NULL and b.disease_id IS NULL)
  UNION 
-(select b.gene_id,b.disease_id,False,mgi_gene_acc_id, True from (select h.id as \"gene_id\", hd.id as \"disease_id\" from human_gene h, hgnc_gene hg, mgi_disease m, human_disease hd where m.entrez_acc_id = hg.entrez_id and hg.hgnc_id = h.hgnc_id and m.taxon_acc_id=9606 and m.do_acc_id = hd.do_id) a RIGHT OUTER JOIN (select h.id as \"gene_id\", hd.id as \"disease_id\", m.mgi_gene_acc_id from human_gene h, mouse_gene mg, ortholog o, mgi_disease m, human_disease hd where m.mgi_gene_acc_id = mg.mgi_gene_acc_id and mg.id = o.mouse_gene_id and o.support_count > 4 and o.human_gene_id = h.id and m.taxon_acc_id=10090 and m.do_acc_id = hd.do_id) b ON a.gene_id = b.gene_id and a.disease_id = b.disease_id WHERE a.gene_id IS NULL and a.disease_id IS NULL)"
+(select b.gene_id,b.disease_id,False,mgi_gene_acc_id, True from (select h.id as \"gene_id\", hd.id as \"disease_id\" from human_gene h, hgnc_gene hg, mgi_disease m, human_disease hd where m.entrez_acc_id = hg.entrez_id and hg.hgnc_id = h.hgnc_acc_id and m.taxon_acc_id=9606 and m.do_acc_id = hd.do_id) a RIGHT OUTER JOIN (select h.id as \"gene_id\", hd.id as \"disease_id\", m.mgi_gene_acc_id from human_gene h, mouse_gene mg, ortholog o, mgi_disease m, human_disease hd where m.mgi_gene_acc_id = mg.mgi_gene_acc_id and mg.id = o.mouse_gene_id and o.support_count > 4 and o.human_gene_id = h.id and m.taxon_acc_id=10090 and m.do_acc_id = hd.do_id) b ON a.gene_id = b.gene_id and a.disease_id = b.disease_id WHERE a.gene_id IS NULL and a.disease_id IS NULL)"
 
 
