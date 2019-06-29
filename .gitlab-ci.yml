@@ -69,14 +69,14 @@ HGNC_data:
         # The following is a useful command to list the environment variables
         # - export
         #
-        echo ${KUBE_URL}
-        echo ${KUBE_TOKEN}
-        echo ${KUBE_NAMESPACE}
-        echo ${KUBE_CA_PEM_FILE}
-        echo ${KUBE_CA_PEM}
-        echo ${KUBECONFIG}
-        echo ${KUBE_INGRESS_BASE_DOMAIN}
-        exit 1
+        - echo ${KUBE_URL}
+        - echo ${KUBE_TOKEN}
+        - echo ${KUBE_NAMESPACE}
+        - echo ${KUBE_CA_PEM_FILE}
+        - echo ${KUBE_CA_PEM}
+        - echo ${KUBECONFIG}
+        - echo ${KUBE_INGRESS_BASE_DOMAIN}
+        - exit 1
 
 
         
