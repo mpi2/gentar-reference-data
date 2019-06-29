@@ -64,7 +64,8 @@ HGNC_data:
     script:
         #
         # The following is a useful command to list the environment variables
-        #- export
+        - export
+        - exit 1ß
         #
         
         # Establish a data directory
