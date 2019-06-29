@@ -31,7 +31,7 @@ variables:
    CI_REGISTRY_IMAGE: $CI_REGISTRY/$CI_PROJECT_PATH
 
    #NOW: $(date '+%Y-%m-%d-%H-%M-%S')
-   NOW: $(date '+%Y-%m-%d')
+   #NOW: $(date '+%Y-%m-%d')
 
 
 services:
@@ -190,6 +190,7 @@ build_image:
     #    - docker login -u "${CI_REGISTRY_USER}" -p "${CI_REGISTRY_PASSWORD}" ${CI_REGISTRY}
         #- docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY
         - docker login -u "${CI_REGISTRY_USER}" -p "${CI_REGISTRY_PASSWORD}" ${CI_REGISTRY}
+        - echo 'export NOW=$(date '+%Y-%m-%d')' > ${MOUNT_POINT}/datetime.env
     script:
         # - mkdir -p data
         # - export LAST_JOB_ID=$(cat "$MOUNT_POINT"/check_data_job_id.txt)
@@ -204,6 +205,7 @@ build_image:
         # - exit
         # - cp  data/
         # - ls -lsh data
+        - source ${MOUNT_POINT}/datetime.env
         - docker build -t reference-db .  | tee ${MOUNT_POINT}/build.log
         # - docker run --name refdb-container reference-db
         - docker run --name refdbcontainer -v "$MOUNT_POINT:/mnt" -d reference-db
@@ -262,6 +264,7 @@ deploy:
     entrypoint: ["/bin/sh", "-c"]
   stage: deploy
   script:
+    - source ${MOUNT_POINT}/datetime.env
     - kubectl version
     - sed -i "s/latest/${NOW}/g" kube/database/refdata-database-deployment.yaml
     - |
