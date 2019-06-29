@@ -30,6 +30,9 @@ variables:
    CI_REGISTRY: dockerhub.ebi.ac.uk
    CI_REGISTRY_IMAGE: $CI_REGISTRY/$CI_PROJECT_PATH
 
+   #NOW: $(date '+%Y-%m-%d-%H-%M-%S')
+   NOW: $(date '+%Y-%m-%d')
+
 
 services:
    - docker:dind
@@ -216,13 +219,11 @@ build_image:
         #
         - sleep 600
 
-        - export NOW=$(date '+%Y-%m-%d-%H-%M-%S')
         - echo "${CI_REGISTRY_IMAGE}":"${NOW}"
-        - docker commit refdbcontainer "${CI_REGISTRY_IMAGE}":"${NOW}"
-        - docker push "${CI_REGISTRY_IMAGE}":"${NOW}"  | tee ${MOUNT_POINT}/push.log
 
+        - docker commit refdbcontainer "${CI_REGISTRY_IMAGE}":"${NOW}"
         - docker tag "${CI_REGISTRY_IMAGE}":"${NOW}" "${CI_REGISTRY_IMAGE}":latest
-        - docker push "${CI_REGISTRY_IMAGE}":latest  | tee ${MOUNT_POINT}/push-latest.log
+        - docker push "${CI_REGISTRY_IMAGE}"  | tee ${MOUNT_POINT}/push.log
 
         - docker logout ${CI_REGISTRY}
 
@@ -230,10 +231,8 @@ build_image:
         - docker login -u "${DOCKER_HUB_USER}" -p "${DOCKER_HUB_PWD}"
  
         - docker tag "${CI_REGISTRY_IMAGE}":"${NOW}" "${DOCKER_HUB_USER}"/"${DOCKER_HUB_REPO}":"${NOW}"
-        - docker push "${DOCKER_HUB_USER}"/"${DOCKER_HUB_REPO}":"${NOW}"  | tee ${MOUNT_POINT}/dockerhub-push.log   
-
         - docker tag "${CI_REGISTRY_IMAGE}":"${NOW}" "${DOCKER_HUB_USER}"/"${DOCKER_HUB_REPO}":latest
-        - docker push "${DOCKER_HUB_USER}"/"${DOCKER_HUB_REPO}":latest  | tee ${MOUNT_POINT}/dockerhub-push-latest.log
+        - docker push "${DOCKER_HUB_USER}"/"${DOCKER_HUB_REPO}"  | tee ${MOUNT_POINT}/dockerhub-push-latest.log
 
         - docker logout       
 
@@ -244,16 +243,35 @@ build_image:
         paths:
             - ${MOUNT_POINT}
 
+#deploy:
+#  stage: deploy
+#  image: dtzar/helm-kubectl
+#  script:
+#    - kubectl config set-cluster k8s --server="${SERVER}"
+#    - kubectl config set clusters.k8s.certificate-authority-data ${CERTIFICATE_AUTHORITY_DATA}
+#    - kubectl config set-credentials gitlab --token="${USER_TOKEN}"
+#    - kubectl config set-context default --cluster=k8s --user=gitlab
+#    - kubectl config use-context default
+#    - sed -i "s/latest/${NOW}/g" kube/database/refdata-database-deployment.yaml
+#    - kubectl apply -f kube/database/refdata-database-deployment.yaml
+#    - kubectl --record deployment.apps/reference-database -n mpi2-reference-data set image deployment.v1.apps/reference-database reference-database-container=rwilsonebi/reference-data-db:${NOW}
+#    - kubectl replace --force=true -f kube/hasura/hasura-deployment.yaml -n mpi2-reference-data
 deploy:
+  image:
+    name: lachlanevenson/k8s-kubectl:latest
+    entrypoint: ["/bin/sh", "-c"]
   stage: deploy
-  image: dtzar/helm-kubectl
   script:
-    - kubectl config set-cluster k8s --server="${SERVER}"
-    - kubectl config set clusters.k8s.certificate-authority-data ${CERTIFICATE_AUTHORITY_DATA}
-    - kubectl config set-credentials gitlab --token="${USER_TOKEN}"
-    - kubectl config set-context default --cluster=k8s --user=gitlab
-    - kubectl config use-context default
+    - kubectl version
     - sed -i "s/latest/${NOW}/g" kube/database/refdata-database-deployment.yaml
-    - kubectl apply -f kube/database/refdata-database-deployment.yaml
-    - kubectl --record deployment.apps/reference-database -n mpi2-reference-data set image deployment.v1.apps/reference-database reference-database-container=rwilsonebi/reference-data-db:${NOW}
+    - |
+      if kubectl apply -f kube/database/refdata-database-deployment.yaml -n mpi2-reference-data | grep -q unchanged; then
+          echo "=> Patching deployment to force image update."
+          kubectl patch -f kube/database/refdata-database-deployment.yaml  -n mpi2-reference-data -p "{\"spec\":{\"template\":{\"metadata\":{\"annotations\":{\"ci-last-updated\":\"$(date +'%s')\"}}}}}"
+      else
+          echo "=> Deployment apply has changed the object, no need to force image update."
+      fi
     - kubectl replace --force=true -f kube/hasura/hasura-deployment.yaml -n mpi2-reference-data
+    - kubectl rollout status -f kube/database/refdata-database-deployment.yaml -n mpi2-reference-data
+    - kubectl rollout status -f kube/hasura/hasura-deployment.yaml -n mpi2-reference-data
+    - kubectl get all,ing -n mpi2-reference-data
