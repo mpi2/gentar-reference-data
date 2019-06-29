@@ -190,7 +190,8 @@ build_image:
     #    - docker login -u "${CI_REGISTRY_USER}" -p "${CI_REGISTRY_PASSWORD}" ${CI_REGISTRY}
         #- docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY
         - docker login -u "${CI_REGISTRY_USER}" -p "${CI_REGISTRY_PASSWORD}" ${CI_REGISTRY}
-        - echo 'export NOW=$(date '+%Y-%m-%d')' > ${MOUNT_POINT}/datetime.env
+        - NOW=$(date '+%Y-%m-%d')
+        - echo "export NOW=${NOW}" > ${MOUNT_POINT}/datetime.env
     script:
         # - mkdir -p data
         # - export LAST_JOB_ID=$(cat "$MOUNT_POINT"/check_data_job_id.txt)
@@ -206,6 +207,7 @@ build_image:
         # - cp  data/
         # - ls -lsh data
         - source ${MOUNT_POINT}/datetime.env
+        - echo ${NOW}
         - docker build -t reference-db .  | tee ${MOUNT_POINT}/build.log
         # - docker run --name refdb-container reference-db
         - docker run --name refdbcontainer -v "$MOUNT_POINT:/mnt" -d reference-db
@@ -260,11 +262,12 @@ build_image:
 #    - kubectl replace --force=true -f kube/hasura/hasura-deployment.yaml -n mpi2-reference-data
 deploy:
   image:
-    name: lachlanevenson/k8s-kubectl:latest
+    name: lachlanevenson/k8s-kubectl:v1.13.7
     entrypoint: ["/bin/sh", "-c"]
   stage: deploy
   script:
     - source ${MOUNT_POINT}/datetime.env
+    - echo ${NOW}
     - kubectl version
     - sed -i "s/latest/${NOW}/g" kube/database/refdata-database-deployment.yaml
     - |
