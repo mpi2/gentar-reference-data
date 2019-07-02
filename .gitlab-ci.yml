@@ -264,7 +264,7 @@ deploy:
     - source ${MOUNT_POINT}/datetime.env
     - echo ${NOW}
     - kubectl config set-cluster k8s --server="${SERVER}"
-    - kubectl config set clusters.k8s.certificate-authority-data ${CERTIFICATE_AUTHORITY_DATA}
+    - kubectl config set clusters.k8s.certificate-authority-data $(echo "${CERTIFICATE_AUTHORITY_DATA}" | base64 -i -)
     - kubectl config set-credentials gitlab-refdata-admin --token="${USER_TOKEN}"
     - kubectl config set-context mpi2-reference-data --cluster=k8s --user=gitlab-refdata-admin
     - kubectl config use-context mpi2-reference-data
