@@ -257,37 +257,41 @@ build_image:
         paths:
             - ${MOUNT_POINT}
 
-#deploy:
-#  stage: deploy
-#  image: dtzar/helm-kubectl
-#  script:
-#    - kubectl config set-cluster k8s --server="${SERVER}"
-#    - kubectl config set clusters.k8s.certificate-authority-data ${CERTIFICATE_AUTHORITY_DATA}
-#    - kubectl config set-credentials gitlab --token="${USER_TOKEN}"
-#    - kubectl config set-context default --cluster=k8s --user=gitlab
-#    - kubectl config use-context default
-#    - sed -i "s/latest/${NOW}/g" kube/database/refdata-database-deployment.yaml
-#    - kubectl apply -f kube/database/refdata-database-deployment.yaml
-#    - kubectl --record deployment.apps/reference-database -n mpi2-reference-data set image deployment.v1.apps/reference-database reference-database-container=rwilsonebi/reference-data-db:${NOW}
-#    - kubectl replace --force=true -f kube/hasura/hasura-deployment.yaml -n mpi2-reference-data
 deploy:
+  stage: deploy
+  image: dtzar/helm-kubectl
+  script:
+    - kubectl version
+    - source ${MOUNT_POINT}/datetime.env
+    - echo ${NOW}
+    - kubectl config set-cluster k8s --server="${SERVER}"
+    - kubectl config set clusters.k8s.certificate-authority-data ${CERTIFICATE_AUTHORITY_DATA}
+    - kubectl config set-credentials gitlab-refdata-admin --token="${USER_TOKEN}"
+    - kubectl config set-context mpi2-reference-data --cluster=k8s --user=gitlab-refdata-admin
+    - kubectl config use-context mpi2-reference-data
+    - sed -i "s/latest/${NOW}/g" kube/database/refdata-database-deployment.yaml
+    - kubectl apply -f kube/database/refdata-database-deployment.yaml
+    #- kubectl --record deployment.apps/reference-database -n mpi2-reference-data set image deployment.v1.apps/reference-database reference-database-container=rwilsonebi/reference-data-db:${NOW}
+    #- kubectl replace --force=true -f kube/hasura/hasura-deployment.yaml -n mpi2-reference-data
+    
+#deploy:
   #image:
   #  name: lachlanevenson/k8s-kubectl:v1.13.7
   #  entrypoint: ["/bin/sh", "-c"]
-  stage: deploy
-  script:
-    - source ${MOUNT_POINT}/datetime.env
-    - echo ${NOW}
-    - kubectl version
-    - sed -i "s/latest/${NOW}/g" kube/database/refdata-database-deployment.yaml
-    - |
-      if kubectl apply -f kube/database/refdata-database-deployment.yaml -n mpi2-reference-data | grep -q unchanged; then
-          echo "=> Patching deployment to force image update."
-          kubectl patch -f kube/database/refdata-database-deployment.yaml  -n mpi2-reference-data -p "{\"spec\":{\"template\":{\"metadata\":{\"annotations\":{\"ci-last-updated\":\"$(date +'%s')\"}}}}}"
-      else
-          echo "=> Deployment apply has changed the object, no need to force image update."
-      fi
-    - kubectl replace --force=true -f kube/hasura/hasura-deployment.yaml -n mpi2-reference-data
-    - kubectl rollout status -f kube/database/refdata-database-deployment.yaml -n mpi2-reference-data
-    - kubectl rollout status -f kube/hasura/hasura-deployment.yaml -n mpi2-reference-data
-    - kubectl get all,ing -n mpi2-reference-data
+#  stage: deploy
+#  script:
+#    - source ${MOUNT_POINT}/datetime.env
+#    - echo ${NOW}
+#    - kubectl version
+#    - sed -i "s/latest/${NOW}/g" kube/database/refdata-database-deployment.yaml
+#    - |
+#      if kubectl apply -f kube/database/refdata-database-deployment.yaml -n mpi2-reference-data | grep -q unchanged; then
+#          echo "=> Patching deployment to force image update."
+#          kubectl patch -f kube/database/refdata-database-deployment.yaml  -n mpi2-reference-data -p "{\"spec\":{\"template\":{\"metadata\":{\"annotations\":{\"ci-last-updated\":\"$(date +'%s')\"}}}}}"
+#      else
+#          echo "=> Deployment apply has changed the object, no need to force image update."
+#      fi
+#    - kubectl replace --force=true -f kube/hasura/hasura-deployment.yaml -n mpi2-reference-data
+#    - kubectl rollout status -f kube/database/refdata-database-deployment.yaml -n mpi2-reference-data
+#    - kubectl rollout status -f kube/hasura/hasura-deployment.yaml -n mpi2-reference-data
+#    - kubectl get all,ing -n mpi2-reference-data
