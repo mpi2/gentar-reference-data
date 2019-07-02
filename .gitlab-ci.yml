@@ -261,7 +261,6 @@ deploy:
   stage: deploy
   image: dtzar/helm-kubectl
   script:
-    - kubectl version
     - source ${MOUNT_POINT}/datetime.env
     - echo ${NOW}
     - kubectl config set-cluster k8s --server="${SERVER}"
@@ -269,6 +268,7 @@ deploy:
     - kubectl config set-credentials gitlab-refdata-admin --token="${USER_TOKEN}"
     - kubectl config set-context mpi2-reference-data --cluster=k8s --user=gitlab-refdata-admin
     - kubectl config use-context mpi2-reference-data
+    - kubectl version
     - sed -i "s/latest/${NOW}/g" kube/database/refdata-database-deployment.yaml
     - kubectl apply -f kube/database/refdata-database-deployment.yaml
     #- kubectl --record deployment.apps/reference-database -n mpi2-reference-data set image deployment.v1.apps/reference-database reference-database-container=rwilsonebi/reference-data-db:${NOW}
