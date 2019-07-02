@@ -69,14 +69,14 @@ HGNC_data:
         # The following is a useful command to list the environment variables
         # - export
         #
-        - echo ${KUBE_URL}
-        - echo ${KUBE_TOKEN}
-        - echo ${KUBE_NAMESPACE}
-        - echo ${KUBE_CA_PEM_FILE}
-        - echo ${KUBE_CA_PEM}
-        - echo ${KUBECONFIG}
-        - echo ${KUBE_INGRESS_BASE_DOMAIN}
-        - exit 1
+        #- echo ${KUBE_URL}
+        #- echo ${KUBE_TOKEN}
+        #- echo ${KUBE_NAMESPACE}
+        #- echo ${KUBE_CA_PEM_FILE}
+        #- echo ${KUBE_CA_PEM}
+        #- echo ${KUBECONFIG}
+        #- echo ${KUBE_INGRESS_BASE_DOMAIN}
+        #- exit 1
 
 
         
@@ -273,7 +273,7 @@ deploy:
     - kubectl apply -f kube/database/refdata-database-deployment.yaml
     #- kubectl --record deployment.apps/reference-database -n mpi2-reference-data set image deployment.v1.apps/reference-database reference-database-container=rwilsonebi/reference-data-db:${NOW}
     #- kubectl replace --force=true -f kube/hasura/hasura-deployment.yaml -n mpi2-reference-data
-    
+
 #deploy:
   #image:
   #  name: lachlanevenson/k8s-kubectl:v1.13.7
