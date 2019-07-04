@@ -200,7 +200,7 @@ build_image:
     #    - docker login -u "${CI_REGISTRY_USER}" -p "${CI_REGISTRY_PASSWORD}" ${CI_REGISTRY}
         #- docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY
         - docker login -u "${CI_REGISTRY_USER}" -p "${CI_REGISTRY_PASSWORD}" ${CI_REGISTRY}
-        - NOW=$(date '+%Y-%m-%d')
+        - NOW=$(date '+%Y-%m-%d-%H-%M-%S)
         - echo "export NOW=${NOW}" > ${MOUNT_POINT}/datetime.env
     script:
         # - mkdir -p data
@@ -259,19 +259,29 @@ build_image:
 
 deploy:
   stage: deploy
-  image: dtzar/helm-kubectl
+  image: dtzar/helm-kubectl:2.13.0
   script:
     - source ${MOUNT_POINT}/datetime.env
     - echo ${NOW}
     - kubectl config set-cluster k8s --server="${SERVER}"
-    - kubectl config set clusters.k8s.certificate-authority-data $(echo "${CERTIFICATE_AUTHORITY_DATA}" | base64 -i -)
+    - kubectl config set clusters.k8s.certificate-authority-data "${CERTIFICATE_AUTHORITY_DATA}"
     - kubectl config set-credentials gitlab-refdata-admin --token="${USER_TOKEN}"
-    - kubectl config set-context mpi2-reference-data --cluster=k8s --user=gitlab-refdata-admin
+    - kubectl config set-context mpi2-reference-data --cluster=k8s --user=gitlab-refdata-admin --namespace=mpi2-reference-data
     - kubectl config use-context mpi2-reference-data
     - kubectl version
     - sed -i "s/latest/${NOW}/g" kube/database/refdata-database-deployment.yaml
     - kubectl apply -f kube/database/refdata-database-deployment.yaml
-    #- kubectl --record deployment.apps/reference-database -n mpi2-reference-data set image deployment.v1.apps/reference-database reference-database-container=rwilsonebi/reference-data-db:${NOW}
+    - kubectl --record deployment.apps/reference-database -n mpi2-reference-data set image deployment.v1.apps/reference-database reference-database-container=rwilsonebi/reference-data-db:${NOW}
+    #- |
+    #  if kubectl apply -f kube/hasura/hasura-deployment.yaml -n mpi2-reference-data | grep -q unchanged; then
+    #      echo "=> Patching deployment to force image update."
+    #      kubectl patch -f kube/hasura/hasura-deployment.yaml  -n mpi2-reference-data -p "{\"spec\":{\"template\":{\"metadata\":{\"annotations\":{\"ci-last-updated\":\"$(date +'%s')\"}}}}}"
+    #  else
+    #      echo "=> Deployment apply has changed the object, no need to force image update."
+    #  fi
+    - kubectl rollout status -f kube/database/refdata-database-deployment.yaml
+    #- kubectl rollout status -f kube/hasura/hasura-deployment.yaml
+    - kubectl get all,ing -n mpi2-reference-data
     #- kubectl replace --force=true -f kube/hasura/hasura-deployment.yaml -n mpi2-reference-data
 
 #deploy:
