@@ -12,4 +12,10 @@ spec:
     targetPort: 8080
   selector:
     app: hasura
-  type: NodePort
+  #
+  # Note: 
+  # To use an Ingress Controller
+  # the type should be set as ClusterIP
+  # rather than NodePort or LoadBalancer.
+  #
+  type: ClusterIP
