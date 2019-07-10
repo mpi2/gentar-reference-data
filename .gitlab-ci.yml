@@ -263,26 +263,19 @@ deploy:
   script:
     - source ${MOUNT_POINT}/datetime.env
     - echo ${NOW}
-    - kubectl config set-cluster local --server="${SERVER}"
-    - kubectl config set clusters.local.certificate-authority-data "${CERTIFICATE_AUTHORITY_DATA}"
-    - kubectl config set-credentials reference-data-admin --token="${USER_TOKEN}"
-    - kubectl config set-context reference-data --cluster=local --user=reference-data-admin --namespace=reference-data
-    - kubectl config use-context reference-data
+    #
+    - kubectl config set-cluster local --server="${KUBERNETES_ENDPOINT}"
+    - kubectl config set clusters.local.certificate-authority-data "${KUBERNETES_CERTIFICATE_AUTHORITY_DATA}"
+    - kubectl config set-credentials reference-data-admin --token="${KUBERNETES_USER_TOKEN}"
+    - kubectl config set-context "${KUBERNETES_NAMESPACE}" --cluster=local --user=${KUBERNETES_USER} --namespace="${KUBERNETES_NAMESPACE}"
+    - kubectl config use-context "${KUBERNETES_NAMESPACE}"
     - kubectl version
+    #
     - sed -i "s/latest/${NOW}/g" kube/database/refdata-database-deployment.yaml
-    - kubectl apply -f kube/database/refdata-database-deployment.yaml
-    - kubectl --record deployment.apps/reference-database -n mpi2-reference-data set image deployment.v1.apps/reference-database reference-database-container=rwilsonebi/reference-data-db:${NOW}
-    #- |
-    #  if kubectl apply -f kube/hasura/hasura-deployment.yaml -n mpi2-reference-data | grep -q unchanged; then
-    #      echo "=> Patching deployment to force image update."
-    #      kubectl patch -f kube/hasura/hasura-deployment.yaml  -n mpi2-reference-data -p "{\"spec\":{\"template\":{\"metadata\":{\"annotations\":{\"ci-last-updated\":\"$(date +'%s')\"}}}}}"
-    #  else
-    #      echo "=> Deployment apply has changed the object, no need to force image update."
-    #  fi
+    - kubectl apply -f kube/database/refdata-database-deployment.yaml --record
     - kubectl rollout status -f kube/database/refdata-database-deployment.yaml
-    #- kubectl rollout status -f kube/hasura/hasura-deployment.yaml
-    - kubectl get all,ing -n mpi2-reference-data
-    #- kubectl replace --force=true -f kube/hasura/hasura-deployment.yaml -n mpi2-reference-data
+    - kubectl get all,ing 
+
 
 #deploy:
   #image:
