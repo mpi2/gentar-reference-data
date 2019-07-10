@@ -4,9 +4,9 @@ metadata:
   labels:
     app: reference-database
   name: reference-database
-  namespace: mpi2-reference-data
+  namespace: reference-data
 spec:
-  replicas: 1
+  replicas: 3
   selector:
     matchLabels:
       app: reference-database

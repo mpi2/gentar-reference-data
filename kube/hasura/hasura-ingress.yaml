@@ -2,7 +2,7 @@ apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
   name: hasura-ingress
-  namespace: mpi2-reference-data
+  namespace: reference-data
   annotations:
     #
     # To use the Ingress Rules set the Service type as ClusterIP
