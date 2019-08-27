@@ -203,7 +203,7 @@ build_image:
     #    - apk add --update curl && rm -rf /var/cache/apk/*
     #    - docker login -u "${CI_REGISTRY_USER}" -p "${CI_REGISTRY_PASSWORD}" ${CI_REGISTRY}
         #- docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY
-        - docker login -u "${CI_REGISTRY_USER}" -p "${CI_REGISTRY_PASSWORD}" ${CI_REGISTRY}
+        - echo "${CI_REGISTRY_PASSWORD}" | docker login -u "${CI_REGISTRY_USER}" --password-stdin  ${CI_REGISTRY}
         - NOW=$(date '+%Y-%m-%d-%H-%M-%S')
         - echo "export NOW=${NOW}" > ${MOUNT_POINT}/datetime.env
     script:
@@ -246,7 +246,7 @@ build_image:
         - docker logout ${CI_REGISTRY}
 
         # PUSH THE IMAGE TO DOCKERHUB
-        - docker login -u "${DOCKER_HUB_USER}" -p "${DOCKER_HUB_PWD}"
+        - echo "${DOCKER_HUB_PWD}" | docker login -u "${DOCKER_HUB_USER}" --password-stdin
  
         - docker tag "${CI_REGISTRY_IMAGE}":"${NOW}" "${DOCKER_HUB_USER}"/"${DOCKER_HUB_REPO}":"${NOW}"
         - docker tag "${CI_REGISTRY_IMAGE}":"${NOW}" "${DOCKER_HUB_USER}"/"${DOCKER_HUB_REPO}":latest
