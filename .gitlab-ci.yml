@@ -36,7 +36,7 @@ variables:
    # To solve the issue with the Docker in Docker 19.03 service.
    # Logged as: GitLab.com CI jobs failing if using docker:stable-dind image
    # see: https://gitlab.com/gitlab-com/gl-infra/production/issues/982
-   DOCKER_TLS_CERTDIR: "/certs"
+   DOCKER_TLS_CERTDIR: ""
 
 services:
    - docker:dind
