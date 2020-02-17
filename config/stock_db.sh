@@ -57,7 +57,11 @@ SELECT mg.symbol,mg.name,mg.mgi_gene_acc_id,mg.type,mg.genome_build,mg.entrez_ge
 left outer join mgi_mrk_list2_tmp mrk
 ON mg.mgi_gene_acc_id = mrk.mgi_marker_acc_id"
 
-# psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "DROP table mgi_gene"
+psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "INSERT INTO mouse_gene (symbol,name,mgi_gene_acc_id,type,subtype) SELECT mrk2.symbol, mrk2.name, mrk2.mgi_marker_acc_id, mrk2.marker_type, mrk2.feature_type FROM (select * from mgi_mrk_list2_tmp as mrk where mrk.cm ~ 'syntenic' and mrk.marker_type = 'Gene' and mrk.start is null and mrk.mgi_marker_acc_id not in (select mg.mgi_gene_acc_id from mgi_gene as mg)) as mrk2"
+psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "INSERT INTO mouse_gene (symbol,name,mgi_gene_acc_id,type,subtype, mgi_chr, mgi_strand, mgi_start, mgi_stop) SELECT mrk2.symbol, mrk2.name, mrk2.mgi_marker_acc_id, mrk2.marker_type, mrk2.feature_type, mrk2.chr, mrk2.strand, mrk2.start, mrk2.stop FROM ( select * from mgi_mrk_list2_tmp as mrk3 where mrk3.start is not null and mrk3.stop is not null and mrk3.marker_type = 'Gene' and mrk3.mgi_marker_acc_id not in (select mg2.mgi_gene_acc_id from mgi_gene as mg2)) as mrk2"
+psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "INSERT INTO mouse_gene (mgi_chr, mgi_strand, mgi_start, mgi_stop) SELECT mrk3.chr, mrk3.strand, mrk3.start, mrk3.stop FROM mgi_mrk_list2_tmp as mrk3 where mrk3.start is not null and mrk3.stop is not null and mrk3.mgi_marker_acc_id in (select mg2.mgi_gene_acc_id from mgi_gene as mg2)"
+
+psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "DROP table mgi_gene"
 
 
 
@@ -71,7 +75,7 @@ WHERE mouse_gene.mgi_gene_acc_id = mouse_gene_synonym.mgi_gene_acc_id"
 
 # psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "INSERT INTO mgi_mrk_list2 (mgi_marker_acc_id,chr,cM,start,stop,strand,symbol,status,name,marker_type,feature_type,synonyms,mouse_gene_id) select mrk.mgi_marker_acc_id,mrk.chr,mrk.cM,mrk.start,mrk.stop,mrk.strand,mrk.symbol,mrk.status,mrk.name,mrk.marker_type,mrk.feature_type,mrk.synonyms, mouse_gene.id FROM mgi_mrk_list2_tmp mrk left outer join mouse_gene ON mrk.mgi_marker_acc_id = mouse_gene.mgi_gene_acc_id"
 
-# psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "DROP table mgi_mrk_list2_tmp"
+psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "DROP table mgi_mrk_list2_tmp"
 psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "DROP table mgi_mrk_list2"
 
 
