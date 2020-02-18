@@ -1,4 +1,4 @@
-import csv, sys, os
+import csv, sys, os, re
 
 class MgiMrkPreProcessor:
 
@@ -8,6 +8,8 @@ class MgiMrkPreProcessor:
         self.pathname = os.path.dirname(self.file)
         self.basename = os.path.basename(self.file)
         self.filename = os.path.abspath(os.path.join(self.pathname,self.basename))
+        
+        self.pattern = re.compile("o")
 
         self.outputfilename = os.path.abspath(os.path.join(self.pathname,'Mrk_synonyms.txt'))
 
@@ -55,19 +57,36 @@ class MgiMrkPreProcessor:
             except csv.Error as e:
                 sys.exit('file {}, line {}: {}'.format(self.filename, reader.line_num, e))
     
+    # Only look for gene synonyms, avoid QTL synonyms
+    def marker_type_match(self, marker_type):
+    	if marker_type == 'Gene':
+    		return True
+    	elif marker_type == 'Complex/Cluster/Region':
+    		return True
+    	elif marker_type == 'DNA Segment':
+    		return True
+    	elif marker_type == 'Pseudogene':
+    		return True
+    	elif marker_type == 'Other Genome Feature':
+    		return True
+    	else:
+    		return False
+    	
+    
     
     def writeMrkFile(self):
         with open(self.outputfilename, 'w') as f:
             writer = csv.writer(f, delimiter='\t', quotechar='|', quoting=csv.QUOTE_MINIMAL)
             try:
                 for row in self.data:
-                    synonyms = row[11].strip().split('|')
-                    for s in synonyms:
-                        synonym = s.strip()
-                        if synonym:
-                            id = row[0].strip()
-                            if id:
-                                writer.writerow([id,synonym])
+					if self.marker_type_match(row[9].strip()):
+                    	synonyms = row[11].strip().split('|')
+                    	for s in synonyms:
+                        	synonym = s.strip()
+                        	if synonym:
+                            	id = row[0].strip()
+                            	if id:
+                                	writer.writerow([id,synonym])
                     
             except csv.Error as e:
                 sys.exit('file {}, line {}: {}'.format(self.outputfilename, writer.line_num, e))
