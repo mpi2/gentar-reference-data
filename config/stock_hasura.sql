@@ -677,7 +677,7 @@ COPY hdb_catalog.hdb_function (function_schema, function_name, is_system_defined
 
 COPY hdb_catalog.hdb_permission (table_schema, table_name, role_name, perm_type, perm_def, comment, is_system_defined) FROM stdin;
 public	hcop	public	select	{"filter": {}, "columns": ["id", "mouse_gene_id", "human_gene_id", "hgnc_acc_id", "human_assert_acc_ids", "human_chr", "human_ensembl_gene_acc_id", "human_entrez_gene_acc_id", "human_name", "human_symbol", "mgi_gene_acc_id", "mouse_assert_acc_ids", "mouse_chr", "mouse_ensembl_gene_acc_id", "mouse_entrez_gene_acc_id", "mouse_name", "mouse_symbol", "support"], "allow_aggregations": true}	\N	f
-public	hgnc_gene	public	select	{"filter": {}, "columns": ["id", "alias_name", "alias_symbol", "bioparadigms_slc", "ccds_acc_id", "cd", "cosmic", "date_approved_reserved", "date_modified", "date_name_changed", "date_symbol_changed", "ena", "ensembl_gene_acc_id", "entrez_acc_id", "enzyme_acc_id", "gene_family", "gene_family_acc_id", "gtrnadb", "hgnc_acc_id", "homeodb", "horde_acc_id", "imgt", "intermediate_filament_db", "iuphar", "kznf_gene_catalog", "lncipedia", "lncrnadb", "location", "location_sortable", "locus_group", "locus_type", "lsdb", "mamit_trnadb", "merops", "mgi_gene_acc_id", "mirbase", "name", "omim_acc_id", "orphanet", "prev_name", "prev_symbol", "pseudogene_org", "pubmed_acc_id", "refseq_accession", "rgd_acc_id", "rna_central_acc_ids", "snornabase", "status", "symbol", "ucsc_acc_id", "uniprot_acc_ids", "vega_acc_id"], "allow_aggregations": true}	\N	f
+public	hgnc_gene	public	select	{"filter": {}, "columns": ["id", "agr_acc_id", "alias_name", "alias_symbol", "bioparadigms_slc", "ccds_acc_id", "cd", "cosmic", "date_approved_reserved", "date_modified", "date_name_changed", "date_symbol_changed", "ena", "ensembl_gene_acc_id", "entrez_acc_id", "enzyme_acc_id", "gene_family", "gene_family_acc_id", "gtrnadb", "hgnc_acc_id", "homeodb", "horde_acc_id", "imgt", "intermediate_filament_db", "iuphar", "kznf_gene_catalog", "lncipedia", "lncrnadb", "location", "location_sortable", "locus_group", "locus_type", "lsdb", "mamit_trnadb", "merops", "mgi_gene_acc_id", "mirbase", "name", "omim_acc_id", "orphanet", "prev_name", "prev_symbol", "pseudogene_org", "pubmed_acc_id", "refseq_accession", "rgd_acc_id", "rna_central_acc_ids", "snornabase", "status", "symbol", "ucsc_acc_id", "uniprot_acc_ids", "vega_acc_id"], "allow_aggregations": true}	\N	f
 public	human_disease	public	select	{"filter": {}, "columns": ["id", "mgi_disease_id", "do_acc_id", "name"], "allow_aggregations": true}	\N	f
 public	human_disease_omim	public	select	{"filter": {}, "columns": ["human_disease_id", "omim_table_id"], "allow_aggregations": true}	\N	f
 public	human_gene	public	select	{"filter": {}, "columns": ["id", "hgnc_gene_id", "hgnc_acc_id", "name", "symbol"], "allow_aggregations": true}	\N	f
@@ -688,7 +688,7 @@ public	mgi_allele	public	select	{"filter": {}, "columns": ["id", "mouse_allele_i
 public	mgi_disease	public	select	{"filter": {}, "columns": ["id", "disease_name", "do_acc_id", "entrez_acc_id", "homologene_acc_id", "mgi_gene_acc_id", "omim_acc_ids", "organism_name", "symbol", "taxon_acc_id"], "allow_aggregations": true}	\N	f
 public	mgi_phenotypic_allele	public	select	{"filter": {}, "columns": ["id", "mouse_allele_id", "mouse_gene_id", "allele_attribute", "allele_name", "allele_symbol", "ensembl_acc_id", "gene_name", "gene_symbol", "mgi_allele_acc_id", "mgi_marker_acc_id", "mp_acc_ids", "pubmed_acc_id", "refseq_acc_id", "synonyms", "type"], "allow_aggregations": true}	\N	f
 public	mouse_allele	public	select	{"filter": {}, "columns": ["id", "allele_symbol", "mgi_allele_acc_id", "name"], "allow_aggregations": true}	\N	f
-public	mouse_gene	public	select	{"filter": {}, "columns": ["id", "ensembl_chromosome", "ensembl_gene_acc_id", "ensembl_start", "ensembl_stop", "ensembl_strand", "entrez_gene_acc_id", "genome_build", "mgi_gene_acc_id", "name", "mgi_cm", "mgi_chromosome", "mgi_start", "mgi_stop", "mgi_strand", "ncbi_start", "ncbi_stop", "ncbi_strand", "symbol", "type", "subtype"], "allow_aggregations": true}	\N	f
+public	mouse_gene	public	select	{"filter": {}, "columns": ["id", "ensembl_chromosome", "ensembl_gene_acc_id", "ensembl_start", "ensembl_stop", "ensembl_strand", "entrez_gene_acc_id", "genome_build", "mgi_gene_acc_id", "name", "mgi_cm", "mgi_chromosome", "mgi_start", "mgi_stop", "mgi_strand", "ncbi_chromosome", "ncbi_start", "ncbi_stop", "ncbi_strand", "symbol", "type", "subtype"], "allow_aggregations": true}	\N	f
 public	mouse_gene_allele	public	select	{"filter": {}, "columns": ["mouse_gene_id", "mouse_allele_id"], "allow_aggregations": true}	\N	f
 public	mouse_gene_synonym	public	select	{"filter": {}, "columns": ["id", "mgi_gene_acc_id", "synonym"], "allow_aggregations": true}	\N	f
 public	mouse_gene_synonym_relation	public	select	{"filter": {}, "columns": ["mouse_gene_id", "mouse_gene_synonym_id"], "allow_aggregations": true}	\N	f
@@ -1039,66 +1039,6 @@ CREATE INDEX event_log_trigger_name_idx ON hdb_catalog.event_log USING btree (tr
 --
 
 CREATE UNIQUE INDEX hdb_version_one_row ON hdb_catalog.hdb_version USING btree (((version IS NOT NULL)));
-
-
---
--- Name: hdb_schema_update_event hdb_schema_update_event_notifier; Type: TRIGGER; Schema: hdb_catalog; Owner: hasurauser
---
-
-CREATE TRIGGER hdb_schema_update_event_notifier AFTER INSERT ON hdb_catalog.hdb_schema_update_event FOR EACH ROW EXECUTE PROCEDURE hdb_catalog.hdb_schema_update_event_notifier();
-
-
---
--- Name: hdb_table hdb_table_oid_check; Type: TRIGGER; Schema: hdb_catalog; Owner: hasurauser
---
-
-CREATE TRIGGER hdb_table_oid_check BEFORE INSERT OR UPDATE ON hdb_catalog.hdb_table FOR EACH ROW EXECUTE PROCEDURE hdb_catalog.hdb_table_oid_check();
-
-
---
--- Name: event_invocation_logs event_invocation_logs_event_id_fkey; Type: FK CONSTRAINT; Schema: hdb_catalog; Owner: hasurauser
---
-
-ALTER TABLE ONLY hdb_catalog.event_invocation_logs
-    ADD CONSTRAINT event_invocation_logs_event_id_fkey FOREIGN KEY (event_id) REFERENCES hdb_catalog.event_log(id);
-
-
---
--- Name: event_triggers event_triggers_schema_name_fkey; Type: FK CONSTRAINT; Schema: hdb_catalog; Owner: hasurauser
---
-
-ALTER TABLE ONLY hdb_catalog.event_triggers
-    ADD CONSTRAINT event_triggers_schema_name_fkey FOREIGN KEY (schema_name, table_name) REFERENCES hdb_catalog.hdb_table(table_schema, table_name) ON UPDATE CASCADE;
-
-
---
--- Name: hdb_allowlist hdb_allowlist_collection_name_fkey; Type: FK CONSTRAINT; Schema: hdb_catalog; Owner: hasurauser
---
-
-ALTER TABLE ONLY hdb_catalog.hdb_allowlist
-    ADD CONSTRAINT hdb_allowlist_collection_name_fkey FOREIGN KEY (collection_name) REFERENCES hdb_catalog.hdb_query_collection(collection_name);
-
-
---
--- Name: hdb_permission hdb_permission_table_schema_fkey; Type: FK CONSTRAINT; Schema: hdb_catalog; Owner: hasurauser
---
-
-ALTER TABLE ONLY hdb_catalog.hdb_permission
-    ADD CONSTRAINT hdb_permission_table_schema_fkey FOREIGN KEY (table_schema, table_name) REFERENCES hdb_catalog.hdb_table(table_schema, table_name) ON UPDATE CASCADE;
-
-
---
--- Name: hdb_relationship hdb_relationship_table_schema_fkey; Type: FK CONSTRAINT; Schema: hdb_catalog; Owner: hasurauser
---
-
-ALTER TABLE ONLY hdb_catalog.hdb_relationship
-    ADD CONSTRAINT hdb_relationship_table_schema_fkey FOREIGN KEY (table_schema, table_name) REFERENCES hdb_catalog.hdb_table(table_schema, table_name) ON UPDATE CASCADE;
-
-
---
--- PostgreSQL database dump complete
---
-
 
 
 --

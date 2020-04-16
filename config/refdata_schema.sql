@@ -28,6 +28,7 @@ GRANT ALL ON schema public TO ref_admin;
 
 CREATE TABLE public.hgnc_gene (
     id bigint NOT NULL,
+    agr_acc_id character varying(255),
     alias_name text,
     alias_symbol character varying(255),
     bioparadigms_slc character varying(255),
