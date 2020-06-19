@@ -138,6 +138,27 @@ MGI_data:
 
 
 
+
+orthology_db_dump:
+    stage: download
+    before_script:
+        - apk add --update --no-cache curl
+    script:
+        
+        # Establish a data directory
+        - mkdir -p "$MOUNT_POINT"
+        - cd "$MOUNT_POINT"
+        
+        - source "$CI_PROJECT_DIR"/scripts/orthologydb_dump.sh
+        # - cp "$CI_PROJECT_DIR"/schema/essential_genes_schema_additions.sql .
+        
+        
+    artifacts:
+        paths:
+            - "$MOUNT_POINT/"
+
+
+
 #
 # Data formatting stage
 #
@@ -175,6 +196,7 @@ MGI-formatting:
 
     dependencies:
         - Synonym-formatting
+        - orthology_db_dump
     artifacts:
         paths:
              - "$MOUNT_POINT/"
