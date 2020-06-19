@@ -150,7 +150,7 @@ orthology_db_dump:
         - cd "$MOUNT_POINT"
         
         - source "$CI_PROJECT_DIR"/scripts/orthologydb_dump.sh
-        # - cp "$CI_PROJECT_DIR"/schema/essential_genes_schema_additions.sql .
+        - cp "$CI_PROJECT_DIR"/schema/refdata_schema_additions.sql .
         
         
     artifacts:
@@ -257,7 +257,10 @@ build_image:
         # when it is built, but this is not trivial in this build system, and a downside  would be
         # that every time the container starts there would always be a lag while the data was loaded.
         #
-        - sleep 600
+        - sleep "${DB_LOAD_TIME}"
+
+        - docker exec refdbcontainer sh /usr/local/data/postgres_processing_time.sh
+        - docker exec refdbcontainer sh -c "rm -r /usr/local/data"
 
         - echo "${CI_REGISTRY_IMAGE}":"${NOW}"
 
