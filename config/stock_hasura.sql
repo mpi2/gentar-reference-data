@@ -1283,3 +1283,29 @@ ALTER TABLE ONLY hdb_catalog.hdb_relationship
 -- PostgreSQL database dump complete
 --
 
+-- 
+-- Change the access to hdb_catalog tables
+-- 
+
+REVOKE ALL ON hdb_catalog.hdb_table FROM hasurauser;
+GRANT SELECT ON hdb_catalog.hdb_table TO hasurauser;
+
+
+REVOKE ALL ON hdb_catalog.hdb_relationship FROM hasurauser;
+GRANT SELECT ON hdb_catalog.hdb_relationship TO hasurauser;
+
+
+REVOKE ALL ON hdb_catalog.hdb_permission FROM hasurauser;
+GRANT SELECT ON hdb_catalog.hdb_permission TO hasurauser;
+
+
+REVOKE ALL ON hdb_catalog.remote_schemas FROM hasurauser;
+GRANT SELECT ON hdb_catalog.remote_schemas TO hasurauser;
+
+
+REVOKE ALL ON hdb_catalog.hdb_action FROM hasurauser;
+GRANT SELECT ON hdb_catalog.hdb_action TO hasurauser;
+
+
+REVOKE ALL ON hdb_catalog.event_triggers FROM hasurauser;
+GRANT SELECT ON hdb_catalog.event_triggers TO hasurauser;

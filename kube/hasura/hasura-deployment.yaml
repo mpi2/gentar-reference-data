@@ -30,8 +30,8 @@ spec:
           value: "false"
         - name: HASURA_GRAPHQL_UNAUTHORIZED_ROLE
           value: "anonymous"
-        - name: HASURA_GRAPHQL_ADMIN_SECRET
-          value: "mpi2#3478"
+        # - name: HASURA_GRAPHQL_ADMIN_SECRET
+        #   value: "mpi2#3478"
         ports:
         - containerPort: 8080
           protocol: TCP
