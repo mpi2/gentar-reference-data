@@ -50,11 +50,9 @@ services:
 
 stages:
    - download
-   - synonym-formatting
    - mgi-formatting
-   - validate
    - build
-   - test
+   - deploy-dev
    - deploy
 
 
@@ -213,6 +211,26 @@ build_image:
             - ${MOUNT_POINT}
 
 deploy:
+  stage: deploy-dev
+  image: dtzar/helm-kubectl:2.13.0
+  script:
+    - source ${MOUNT_POINT}/datetime.env
+    - echo ${NOW}
+    #
+    - kubectl config set-cluster local --server="${KUBERNETES_ENDPOINT}"
+    - kubectl config set clusters.local.certificate-authority-data "${KUBERNETES_CERTIFICATE_AUTHORITY_DATA}"
+    - kubectl config set-credentials ${KUBERNETES_DEV_USER} --token="${KUBERNETES_DEV_USER_TOKEN}"
+    - kubectl config set-context "${KUBERNETES_DEV_NAMESPACE}" --cluster=local --user=${KUBERNETES_DEV_USER} --namespace="${KUBERNETES_DEV_NAMESPACE}"
+    - kubectl config use-context "${KUBERNETES_DEV_NAMESPACE}"
+    - kubectl version
+    #
+    - sed -i "s/latest/${NOW}/g" kube/dev/database/refdata-database-deployment.yaml
+    - kubectl apply -f kube/dev/database/refdata-database-deployment.yaml --record
+    - kubectl rollout status -f kube/dev/database/refdata-database-deployment.yaml
+    - kubectl get all,ing 
+
+
+deploy:
   stage: deploy
   image: dtzar/helm-kubectl:2.13.0
   script:
@@ -221,35 +239,13 @@ deploy:
     #
     - kubectl config set-cluster local --server="${KUBERNETES_ENDPOINT}"
     - kubectl config set clusters.local.certificate-authority-data "${KUBERNETES_CERTIFICATE_AUTHORITY_DATA}"
-    - kubectl config set-credentials reference-data-admin --token="${KUBERNETES_USER_TOKEN}"
+    - kubectl config set-credentials ${KUBERNETES_USER} --token="${KUBERNETES_USER_TOKEN}"
     - kubectl config set-context "${KUBERNETES_NAMESPACE}" --cluster=local --user=${KUBERNETES_USER} --namespace="${KUBERNETES_NAMESPACE}"
     - kubectl config use-context "${KUBERNETES_NAMESPACE}"
     - kubectl version
     #
-    - sed -i "s/latest/${NOW}/g" kube/database/refdata-database-deployment.yaml
-    - kubectl apply -f kube/database/refdata-database-deployment.yaml --record
-    - kubectl rollout status -f kube/database/refdata-database-deployment.yaml
+    - sed -i "s/latest/${NOW}/g" kube/production/database/refdata-database-deployment.yaml
+    - kubectl apply -f kube/production/database/refdata-database-deployment.yaml --record
+    - kubectl rollout status -f kube/production/database/refdata-database-deployment.yaml
     - kubectl get all,ing 
 
-
-#deploy:
-  #image:
-  #  name: lachlanevenson/k8s-kubectl:v1.13.7
-  #  entrypoint: ["/bin/sh", "-c"]
-#  stage: deploy
-#  script:
-#    - source ${MOUNT_POINT}/datetime.env
-#    - echo ${NOW}
-#    - kubectl version
-#    - sed -i "s/latest/${NOW}/g" kube/database/refdata-database-deployment.yaml
-#    - |
-#      if kubectl apply -f kube/database/refdata-database-deployment.yaml -n mpi2-reference-data | grep -q unchanged; then
-#          echo "=> Patching deployment to force image update."
-#          kubectl patch -f kube/database/refdata-database-deployment.yaml  -n mpi2-reference-data -p "{\"spec\":{\"template\":{\"metadata\":{\"annotations\":{\"ci-last-updated\":\"$(date +'%s')\"}}}}}"
-#      else
-#          echo "=> Deployment apply has changed the object, no need to force image update."
-#      fi
-#    - kubectl replace --force=true -f kube/hasura/hasura-deployment.yaml -n mpi2-reference-data
-#    - kubectl rollout status -f kube/database/refdata-database-deployment.yaml -n mpi2-reference-data
-#    - kubectl rollout status -f kube/hasura/hasura-deployment.yaml -n mpi2-reference-data
-#    - kubectl get all,ing -n mpi2-reference-data

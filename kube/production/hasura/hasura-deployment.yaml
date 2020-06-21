@@ -32,7 +32,19 @@ spec:
           value: "anonymous"
         # - name: HASURA_GRAPHQL_ADMIN_SECRET
         #   value: "mpi2#3478"
+        - name: HASURA_GRAPHQL_ENABLED_APIS
+          value: "graphql,metadata"
+        - name: HASURA_GRAPHQL_LIVE_QUERIES_MULTIPLEXED_REFETCH_INTERVAL
+          value: "5000"
+        - name: HASURA_GRAPHQL_EVENTS_FETCH_INTERVAL
+          value: "3000"
         ports:
         - containerPort: 8080
           protocol: TCP
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 8080
+          initialDelaySeconds: 120
+          periodSeconds: 60
         resources: {}

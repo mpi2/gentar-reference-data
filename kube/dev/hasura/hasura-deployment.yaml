@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: hasura
+    hasuraService: custom
+  name: hasura
+  namespace: reference-data-dev
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hasura
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: hasura
+    spec:
+      containers:
+      - image: hasura/graphql-engine:v1.2.2
+        imagePullPolicy: IfNotPresent
+        name: hasura
+        env:
+        - name: HASURA_GRAPHQL_DATABASE_URL
+          value: postgres://hasurauser:hasurauser@reference-database:5432/refdata
+        - name: HASURA_GRAPHQL_ENABLE_CONSOLE
+          value: "true"
+        - name: HASURA_GRAPHQL_ENABLE_TELEMETRY
+          value: "false"
+        - name: HASURA_GRAPHQL_UNAUTHORIZED_ROLE
+          value: "anonymous"
+        # - name: HASURA_GRAPHQL_ADMIN_SECRET
+        #   value: "mpi2#3478"
+        - name: HASURA_GRAPHQL_ENABLED_APIS
+          value: "graphql,metadata,pgdump"
+        - name: HASURA_GRAPHQL_LIVE_QUERIES_MULTIPLEXED_REFETCH_INTERVAL
+          value: "5000"
+        - name: HASURA_GRAPHQL_EVENTS_FETCH_INTERVAL
+          value: "3000"
+        ports:
+        - containerPort: 8080
+          protocol: TCP
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 8080
+          initialDelaySeconds: 120
+          periodSeconds: 60
+        resources: {}

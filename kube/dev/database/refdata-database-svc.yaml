@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: reference-database
+  namespace: reference-data-dev
+spec:
+  ports:
+  - port: 5432
+    protocol: TCP
+  selector:
+    app: reference-database
