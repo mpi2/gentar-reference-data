@@ -10,13 +10,14 @@ services:
       refdata:
 
   hasura:
-    image: hasura/graphql-engine:v1.0.0-beta.2
+    image: hasura/graphql-engine:v1.2.2
     restart: always
     environment:
-        - HASURA_GRAPHQL_DATABASE_URL=postgres://hasurauser:hasurauser@reference-database:5432/refdata
-        - HASURA_GRAPHQL_ENABLE_CONSOLE=true
-        - HASURA_GRAPHQL_ENABLE_TELEMETRY=false
-        - HASURA_GRAPHQL_UNAUTHORIZED_ROLE="public"
+      HASURA_GRAPHQL_DATABASE_URL: postgres://hasurauser:hasurauser@reference-database:5432/refdata
+      HASURA_GRAPHQL_ENABLE_CONSOLE: "true"
+      HASURA_GRAPHQL_ENABLE_TELEMETRY: "false"
+      HASURA_GRAPHQL_ADMIN_SECRET: "refdataadmin"
+      HASURA_GRAPHQL_UNAUTHORIZED_ROLE: "anonymous"
     ports:
       - "8088:8080"
     networks:
