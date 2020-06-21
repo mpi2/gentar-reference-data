@@ -210,7 +210,7 @@ build_image:
         paths:
             - ${MOUNT_POINT}
 
-deploy:
+deploy-dev:
   stage: deploy-dev
   image: dtzar/helm-kubectl:2.13.0
   script:
