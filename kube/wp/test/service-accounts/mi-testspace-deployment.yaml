@@ -1,0 +1,45 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: mi-testspace-deployment
+  namespace: mi-testspace
+---
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: mi-testspace-deployment-access
+  namespace: mi-testspace
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  - services
+  verbs: [ "get", "list", "watch", "create", "update", "patch", "delete" ]
+- apiGroups:
+  - "apps"
+  resources:
+  - deployments
+  - replicasets
+  verbs: [ "get", "list", "watch", "create", "update", "patch", "delete" ]
+- apiGroups:
+  - "extensions"
+  resources:
+  - deployments
+  - replicasets
+  - ingresses
+  verbs: [ "get", "list", "watch", "create", "update", "patch", "delete" ]
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: RoleBinding
+metadata:
+  name: mi-testspace-deployment-access-binding
+  namespace: mi-testspace
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: mi-testspace-deployment-access
+subjects:
+- kind: ServiceAccount
+  name: mi-testspace-deployment
+  namespace: mi-testspace

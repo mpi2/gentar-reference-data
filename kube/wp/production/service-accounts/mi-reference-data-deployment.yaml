@@ -1,0 +1,45 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: mi-reference-data-deployment
+  namespace: mi-reference-data
+---
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: mi-reference-data-deployment-access
+  namespace: mi-reference-data
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  - services
+  verbs: [ "get", "list", "watch", "create", "update", "patch", "delete" ]
+- apiGroups:
+  - "apps"
+  resources:
+  - deployments
+  - replicasets
+  verbs: [ "get", "list", "watch", "create", "update", "patch", "delete" ]
+- apiGroups:
+  - "extensions"
+  resources:
+  - deployments
+  - replicasets
+  - ingresses
+  verbs: [ "get", "list", "watch", "create", "update", "patch", "delete" ]
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: RoleBinding
+metadata:
+  name: mi-reference-data-deployment-access-binding
+  namespace: mi-reference-data
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: mi-reference-data-deployment-access
+subjects:
+- kind: ServiceAccount
+  name: mi-reference-data-deployment
+  namespace: mi-reference-data

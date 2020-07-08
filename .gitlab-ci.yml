@@ -54,7 +54,7 @@ stages:
    - build
    - deploy-dev
    - dev-test
-   - deploy
+   - production-deploy
    - production-test
 
 
@@ -212,6 +212,102 @@ build_image:
         paths:
             - ${MOUNT_POINT}
 
+
+
+
+hh-test-deploy:
+  stage: deploy-dev
+  # Use an image with helm v2.14.3, kubectl v1.15.2, alpine 3.10
+  # rancher/hyperkube:v1.15.3-rancher1 installed on the hh cluster
+  image: dtzar/helm-kubectl:2.14.3
+  only:
+    refs:
+      - master
+  script:
+    #
+    - kubectl config set-cluster local --server="${HH_KUBERNETES_ENDPOINT}"
+    - kubectl config set clusters.local.certificate-authority-data "${HH_KUBERNETES_CERTIFICATE_AUTHORITY_DATA}"
+    - kubectl config set-credentials ${HH_KUBERNETES_TEST_USER} --token="${HH_KUBERNETES_TEST_USER_TOKEN}"
+    - kubectl config set-context "${HH_KUBERNETES_TEST_NAMESPACE}" --cluster=local --user=${HH_KUBERNETES_TEST_USER} --namespace="${HH_KUBERNETES_TEST_NAMESPACE}"
+    - kubectl config use-context "${HH_KUBERNETES_TEST_NAMESPACE}"
+    - kubectl version
+    #
+    - kubectl apply -f kube/wp/test/database/refdata-database-deployment.yaml
+    - kubectl rollout status -f kube/wp/test/database/refdata-database-deployment.yaml
+    
+    - kubectl apply -f kube/wp/test/database/refdata-database-svc.yaml
+    
+    - kubectl apply -f kube/wp/test/hasura/hasura-deployment.yaml
+    - kubectl rollout status -f kube/wp/test/hasura/hasura-deployment.yaml
+    
+    - kubectl apply -f kube/wp/test/hasura/hasura-svc.yaml
+    - kubectl apply -f kube/wp/test/hasura/hasura-ingress.yaml
+    
+    
+    - kubectl get pod,deployment,rs,svc,ing
+    
+    # Wait?
+    # Run tests
+    
+    # Clean the test environment
+    - kubectl delete -f kube/wp/test/hasura/hasura-ingress.yaml
+    - kubectl delete -f kube/wp/test/hasura/hasura-svc.yaml
+    - kubectl delete -f kube/wp/test/hasura/hasura-deployment.yaml
+    - kubectl delete -f kube/wp/test/database/refdata-database-svc.yaml
+    - kubectl delete -f kube/wp/test/database/refdata-database-deployment.yaml
+    
+    - kubectl get pod,deployment,rs,svc,ing
+    
+
+
+hx-test-deploy:
+  stage: deploy-dev
+  # Use an image with helm v2.14.3, kubectl v1.15.2, alpine 3.10
+  # rancher/hyperkube:v1.15.3-rancher1 installed on the hh cluster
+  image: dtzar/helm-kubectl:2.14.3
+  only:
+    refs:
+      - master
+  script:
+    #
+    - kubectl config set-cluster local --server="${HX_KUBERNETES_ENDPOINT}"
+    - kubectl config set clusters.local.certificate-authority-data "${HX_KUBERNETES_CERTIFICATE_AUTHORITY_DATA}"
+    - kubectl config set-credentials ${HX_KUBERNETES_TEST_USER} --token="${HX_KUBERNETES_TEST_USER_TOKEN}"
+    - kubectl config set-context "${HX_KUBERNETES_TEST_NAMESPACE}" --cluster=local --user=${HX_KUBERNETES_TEST_USER} --namespace="${HX_KUBERNETES_TEST_NAMESPACE}"
+    - kubectl config use-context "${HX_KUBERNETES_TEST_NAMESPACE}"
+    - kubectl version
+    #
+    - kubectl apply -f kube/wp/test/database/refdata-database-deployment.yaml
+    - kubectl rollout status -f kube/wp/test/database/refdata-database-deployment.yaml
+    
+    - kubectl apply -f kube/wp/test/database/refdata-database-svc.yaml
+    
+    - kubectl apply -f kube/wp/test/hasura/hasura-deployment.yaml
+    - kubectl rollout status -f kube/wp/test/hasura/hasura-deployment.yaml
+    
+    - kubectl apply -f kube/wp/test/hasura/hasura-svc.yaml
+    - kubectl apply -f kube/wp/test/hasura/hasura-ingress.yaml
+    
+    
+    - kubectl get pod,deployment,rs,svc,ing
+    
+    # Wait?
+    # Run tests
+    
+    # Clean the test environment
+    - kubectl delete -f kube/wp/test/hasura/hasura-ingress.yaml
+    - kubectl delete -f kube/wp/test/hasura/hasura-svc.yaml
+    - kubectl delete -f kube/wp/test/hasura/hasura-deployment.yaml
+    - kubectl delete -f kube/wp/test/database/refdata-database-svc.yaml
+    - kubectl delete -f kube/wp/test/database/refdata-database-deployment.yaml
+    
+    - kubectl get pod,deployment,rs,svc,ing
+    
+
+
+
+
+
 deploy-dev:
   stage: deploy-dev
   image: dtzar/helm-kubectl:2.13.0
@@ -253,7 +349,7 @@ dev-test:
 
 
 deploy:
-  stage: deploy
+  stage: production-deploy
   image: dtzar/helm-kubectl:2.13.0
   script:
     - source ${MOUNT_POINT}/datetime.env
@@ -271,6 +367,78 @@ deploy:
     - kubectl rollout status -f kube/production/database/refdata-database-deployment.yaml
     - kubectl get all,ing 
 
+
+
+
+hh-production-deploy:
+  stage: production-deploy
+  # Use an image with helm v2.14.3, kubectl v1.15.2, alpine 3.10
+  # rancher/hyperkube:v1.15.3-rancher1 installed on the hh cluster
+  image: dtzar/helm-kubectl:2.14.3
+  only:
+    refs:
+      - master
+  script:
+    - source ${MOUNT_POINT}/datetime.env
+    - echo ${NOW}
+    #
+    - kubectl config set-cluster local --server="${HH_KUBERNETES_ENDPOINT}"
+    - kubectl config set clusters.local.certificate-authority-data "${HH_KUBERNETES_CERTIFICATE_AUTHORITY_DATA}"
+    - kubectl config set-credentials ${HH_KUBERNETES_USER} --token="${HH_KUBERNETES_USER_TOKEN}"
+    - kubectl config set-context "${HH_KUBERNETES_NAMESPACE}" --cluster=local --user=${HH_KUBERNETES_USER} --namespace="${HH_KUBERNETES_NAMESPACE}"
+    - kubectl config use-context "${HH_KUBERNETES_NAMESPACE}"
+    - kubectl version
+    #
+    - sed -i "s/latest/${NOW}/g" kube/wp/production/database/refdata-database-deployment.yaml
+    - sed -i "s/STRING_REPLACED_DURING_REDEPLOY/$(date)/g" kube/wp/production/database/refdata-database-deployment.yaml
+    
+    - |
+      if kubectl apply -f kube/wp/production/database/refdata-database-deployment.yaml --record | grep -q unchanged; then
+          echo "=> Patching deployment to force image update."
+          kubectl patch -f kube/wp/production/database/refdata-database-deployment.yaml --record -p "{\"spec\":{\"template\":{\"metadata\":{\"annotations\":{\"ci-last-updated\":\"$(date +'%s')\"}}}}}"
+      else
+          echo "=> Deployment apply has changed the object, no need to force image update."
+      fi
+
+
+    - kubectl rollout status -f kube/wp/production/database/refdata-database-deployment.yaml
+    - kubectl get pod,deployment,rs
+
+
+
+hx-production-deploy:
+  stage: production-deploy
+  # Use an image with helm v2.14.3, kubectl v1.15.2, alpine 3.10
+  # rancher/hyperkube:v1.15.3-rancher1 installed on the hh cluster
+  image: dtzar/helm-kubectl:2.14.3
+  only:
+    refs:
+      - master
+  script:
+    - source ${MOUNT_POINT}/datetime.env
+    - echo ${NOW}
+    #
+    - kubectl config set-cluster local --server="${HX_KUBERNETES_ENDPOINT}"
+    - kubectl config set clusters.local.certificate-authority-data "${HX_KUBERNETES_CERTIFICATE_AUTHORITY_DATA}"
+    - kubectl config set-credentials ${HX_KUBERNETES_USER} --token="${HX_KUBERNETES_USER_TOKEN}"
+    - kubectl config set-context "${HX_KUBERNETES_NAMESPACE}" --cluster=local --user=${HX_KUBERNETES_USER} --namespace="${HX_KUBERNETES_NAMESPACE}"
+    - kubectl config use-context "${HX_KUBERNETES_NAMESPACE}"
+    - kubectl version
+    #
+    - sed -i "s/latest/${NOW}/g" kube/wp/production/database/refdata-database-deployment.yaml
+    - sed -i "s/STRING_REPLACED_DURING_REDEPLOY/$(date)/g" kube/wp/production/database/refdata-database-deployment.yaml
+    
+    - |
+      if kubectl apply -f kube/wp/production/database/refdata-database-deployment.yaml --record | grep -q unchanged; then
+          echo "=> Patching deployment to force image update."
+          kubectl patch -f kube/wp/production/database/refdata-database-deployment.yaml --record -p "{\"spec\":{\"template\":{\"metadata\":{\"annotations\":{\"ci-last-updated\":\"$(date +'%s')\"}}}}}"
+      else
+          echo "=> Deployment apply has changed the object, no need to force image update."
+      fi
+
+
+    - kubectl rollout status -f kube/wp/production/database/refdata-database-deployment.yaml
+    - kubectl get pod,deployment,rs
 
 production-test:
   image: ubuntu:latest

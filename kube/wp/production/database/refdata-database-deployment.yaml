@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: reference-database
+  name: reference-database
+  namespace: mi-reference-data
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: reference-database
+  minReadySeconds: 5
+  strategy:
+    # indicate which strategy we want for rolling update
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: reference-database
+    spec:
+      containers:
+      - image: rwilsonebi/reference-data-db:latest
+        imagePullPolicy: Always
+        name: reference-database-container
+        livenessProbe:
+          tcpSocket:
+            port: 5432
+        ports:
+        - containerPort: 5432
+          name: http
+          protocol: TCP
+        resources: {}
