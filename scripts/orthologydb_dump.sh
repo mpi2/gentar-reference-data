@@ -70,7 +70,7 @@ fetch_data()
     request_payload="$1"
     output_file="$2"
 
-    curl "$ENDPOINT" -X -x "$EBI_PROXY" POST --data "$request_payload" \
+    curl "$ENDPOINT" -X POST -x "$EBI_PROXY" --data "$request_payload" \
           -H "Content-Type: application/json" \
           -H "X-Hasura-Role: admin" > "$output_file"
 }
