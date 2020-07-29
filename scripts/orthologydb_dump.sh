@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-ENDPOINT="https://www.gentar.org/orthology-dev/v1alpha1/pg_dump"
+ENDPOINT="http://$DATABASE_HOST:$HASURA_PORT/v1alpha1/pg_dump"
 EBI_PROXY="http://hx-wwwcache.ebi.ac.uk:3128"
 
 error_exit()
