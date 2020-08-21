@@ -32,10 +32,10 @@ process_query()
     expected="$3"
     
     if [ "$DEBUG" = true ]; then
-        echo "curl -sSLN -w "%{http_code}"  \"${ENDPOINT}\" -H \"Content-type: application/json\" -H \"cache-control: no-cache\" -X POST --data \"${query}\""
+        echo "curl -sSLN -w "%{http_code}"  \"${ENDPOINT}\" --tls-max 1.2 --tlsv1.2  --ciphers DEFAULT@SECLEVEL=1 -H \"Content-type: application/json\" -H \"cache-control: no-cache\" -X POST --data \"${query}\""
     fi
     
-    data=$(curl -sSLN -w "%{http_code}" "${ENDPOINT}" -H "Content-type: application/json" -H "cache-control: no-cache" -X POST --data "${query}")
+    data=$(curl -sSLN -w "%{http_code}" "${ENDPOINT}" --tls-max 1.2 --tlsv1.2  --ciphers DEFAULT@SECLEVEL=1 -H "Content-type: application/json" -H "cache-control: no-cache" -X POST --data "${query}")
     check_http_status_code "$data"
     
     # Remove the 200 status code from the end of the response and process
