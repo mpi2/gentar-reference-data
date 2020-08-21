@@ -31,14 +31,20 @@ metadata:
     # adds 301 redirect with trailing slash
     # see: https://github.com/kubernetes/ingress-nginx/issues/646
     nginx.ingress.kubernetes.io/configuration-snippet: |
-        rewrite ^(/mi-reference-data)$ $1/ permanent;
-    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+        rewrite ^(/refdata)$ $1/ permanent;
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
 
 spec:
   rules:
-  - http:
+  - host: www.gentar.org
+    http:
       paths:
-      - path: /mi-reference-data(/|$)(.*)
+      - path: /refdata(/|$)(.*)
         backend:
           serviceName: hasura
           servicePort: 80
+  tls:
+    - hosts:
+        - gentar.org
+        - www.gentar.org
+      secretName: gentar-tls
