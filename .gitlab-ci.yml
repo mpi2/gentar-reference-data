@@ -53,7 +53,6 @@ stages:
    - mgi-formatting
    - build
    - deploy-dev
-   - dev-test
    - production-deploy
    - production-test
 
@@ -324,67 +323,6 @@ hx-test-deploy:
     
 
 
-
-
-
-#deploy-dev:
-#  stage: deploy-dev
-#  image: dtzar/helm-kubectl:2.13.0
-#  script:
-#    - source ${MOUNT_POINT}/datetime.env
-#    - echo ${NOW}
-#    #
-#    - kubectl config set-cluster local --server="${KUBERNETES_ENDPOINT}"
-#    - kubectl config set clusters.local.certificate-authority-data "${KUBERNETES_CERTIFICATE_AUTHORITY_DATA}"
-#    - kubectl config set-credentials ${KUBERNETES_DEV_USER} --token="${KUBERNETES_DEV_USER_TOKEN}"
-#    - kubectl config set-context "${KUBERNETES_DEV_NAMESPACE}" --cluster=local --user=${KUBERNETES_DEV_USER} --namespace="${KUBERNETES_DEV_NAMESPACE}"
-#    - kubectl config use-context "${KUBERNETES_DEV_NAMESPACE}"
-#    - kubectl version
-#    #
-#    - sed -i "s/latest/${NOW}/g" kube/dev/database/refdata-database-deployment.yaml
-#    - kubectl apply -f kube/dev/database/refdata-database-deployment.yaml --record
-#    - kubectl rollout status -f kube/dev/database/refdata-database-deployment.yaml
-#    - kubectl get all,ing 
-#
-#
-#
-#
-#dev-test:
-#  image: ubuntu:latest
-#  stage: dev-test
-#  before_script:
-#    - apt-get update && apt-get install -y curl && apt-get clean && rm -rf /var/lib/apt/lists/*
-#  script:
-#    # Establish a data directory
-#    - mkdir -p "$MOUNT_POINT"
-#    - cd "$MOUNT_POINT"
-#    
-#    - source "$CI_PROJECT_DIR"/scripts/service_test.sh  | tee ${MOUNT_POINT}/dev-test.log
-#        
-#  artifacts:
-#    paths:
-#      - "$MOUNT_POINT/"
-#
-#
-#
-#deploy:
-#  stage: production-deploy
-#  image: dtzar/helm-kubectl:2.13.0
-#  script:
-#    - source ${MOUNT_POINT}/datetime.env
-#    - echo ${NOW}
-#    #
-#    - kubectl config set-cluster local --server="${KUBERNETES_ENDPOINT}"
-#    - kubectl config set clusters.local.certificate-authority-data "${KUBERNETES_CERTIFICATE_AUTHORITY_DATA}"
-#    - kubectl config set-credentials ${KUBERNETES_USER} --token="${KUBERNETES_USER_TOKEN}"
-#    - kubectl config set-context "${KUBERNETES_NAMESPACE}" --cluster=local --user=${KUBERNETES_USER} --namespace="${KUBERNETES_NAMESPACE}"
-#    - kubectl config use-context "${KUBERNETES_NAMESPACE}"
-#    - kubectl version
-#    #
-#    - sed -i "s/latest/${NOW}/g" kube/production/database/refdata-database-deployment.yaml
-#    - kubectl apply -f kube/production/database/refdata-database-deployment.yaml --record
-#    - kubectl rollout status -f kube/production/database/refdata-database-deployment.yaml
-#    - kubectl get all,ing 
 
 
 
