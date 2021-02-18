@@ -1,4 +1,4 @@
-image: docker:stable
+image: $CI_REGISTRY/mouse-informatics/docker
 
 variables:
    # When using dind service we need to instruct docker, to talk with the
@@ -38,8 +38,6 @@ variables:
    # see: https://gitlab.com/gitlab-com/gl-infra/production/issues/982
    DOCKER_TLS_CERTDIR: ""
 
-services:
-   - docker:dind
 
 # Use this command to look at your docker environment
 # Note: This step can be overwritten by before_script sections in specific jobs.
@@ -105,7 +103,7 @@ MGI_data:
 
 
 orthology_db_dump:
-    image: postgres:11-alpine
+    image: $CI_REGISTRY/mouse-informatics/postgres:11-alpine
     stage: download
     before_script:
         - apk add --update --no-cache curl
@@ -147,6 +145,9 @@ MGI-formatting:
 
 build_image:
     stage: build
+    services:
+        - name: $CI_REGISTRY/mouse-informatics/dind:latest
+          alias: docker
     before_script:
     #    - apk add --update curl && rm -rf /var/cache/apk/*
     #    - docker login -u "${CI_REGISTRY_USER}" -p "${CI_REGISTRY_PASSWORD}" ${CI_REGISTRY}
@@ -191,8 +192,10 @@ build_image:
         - echo "${CI_REGISTRY_IMAGE}":"${NOW}"
 
         - docker commit refdbcontainer "${CI_REGISTRY_IMAGE}":"${NOW}"
+        - docker push "${CI_REGISTRY_IMAGE}":"${NOW}"  | tee ${MOUNT_POINT}/push.log
+        
         - docker tag "${CI_REGISTRY_IMAGE}":"${NOW}" "${CI_REGISTRY_IMAGE}":latest
-        - docker push "${CI_REGISTRY_IMAGE}"  | tee ${MOUNT_POINT}/push.log
+        - docker push "${CI_REGISTRY_IMAGE}":latest  | tee ${MOUNT_POINT}/push.log
 
         - docker logout ${CI_REGISTRY}
 
@@ -200,8 +203,10 @@ build_image:
         - echo "${DOCKER_HUB_PWD}" | docker login -u "${DOCKER_HUB_USER}" --password-stdin
  
         - docker tag "${CI_REGISTRY_IMAGE}":"${NOW}" "${DOCKER_HUB_USER}"/"${DOCKER_HUB_REPO}":"${NOW}"
+        - docker push "${DOCKER_HUB_USER}"/"${DOCKER_HUB_REPO}":"${NOW}"  | tee ${MOUNT_POINT}/dockerhub-push-latest.log
+        
         - docker tag "${CI_REGISTRY_IMAGE}":"${NOW}" "${DOCKER_HUB_USER}"/"${DOCKER_HUB_REPO}":latest
-        - docker push "${DOCKER_HUB_USER}"/"${DOCKER_HUB_REPO}"  | tee ${MOUNT_POINT}/dockerhub-push-latest.log
+        - docker push "${DOCKER_HUB_USER}"/"${DOCKER_HUB_REPO}":latest  | tee ${MOUNT_POINT}/dockerhub-push-latest.log
 
         - docker logout       
 
@@ -220,7 +225,7 @@ hh-test-deploy:
   # Use an ubuntu image with kubectl v1.15.2
   # An ubuntu base is required to provide a bash shell for the tests
   # rancher/hyperkube:v1.15.3-rancher1 installed on the hh cluster
-  image: rwilsonebi/ubuntu-kubectl:v1.15.2
+  image: $CI_REGISTRY/mouse-informatics/kubectl:v1.15.2
   only:
     refs:
       - master
@@ -272,7 +277,7 @@ hx-test-deploy:
   # Use an ubuntu image with kubectl v1.15.2
   # An ubuntu base is required to provide a bash shell for the tests
   # rancher/hyperkube:v1.15.3-rancher1 installed on the hh cluster
-  image: rwilsonebi/ubuntu-kubectl:v1.15.2
+  image: $CI_REGISTRY/mouse-informatics/kubectl:v1.15.2
   only:
     refs:
       - master
@@ -331,7 +336,7 @@ hh-production-deploy:
   stage: production-deploy
   # Use an image with helm v2.14.3, kubectl v1.15.2, alpine 3.10
   # rancher/hyperkube:v1.15.3-rancher1 installed on the hh cluster
-  image: dtzar/helm-kubectl:2.14.3
+  image: $CI_REGISTRY/mouse-informatics/helm-kubectl-alpine:latest
   only:
     refs:
       - master
@@ -367,7 +372,7 @@ hx-production-deploy:
   stage: production-deploy
   # Use an image with helm v2.14.3, kubectl v1.15.2, alpine 3.10
   # rancher/hyperkube:v1.15.3-rancher1 installed on the hh cluster
-  image: dtzar/helm-kubectl:2.14.3
+  image: $CI_REGISTRY/mouse-informatics/helm-kubectl-alpine:latest
   only:
     refs:
       - master
@@ -398,7 +403,7 @@ hx-production-deploy:
     - kubectl get pod,deployment,rs
 
 production-test:
-  image: ubuntu:latest
+  image: $CI_REGISTRY/mouse-informatics/ubuntu:latest
   stage: production-test
   before_script:
     - apt-get update && apt-get install -y curl && apt-get clean && rm -rf /var/lib/apt/lists/*
