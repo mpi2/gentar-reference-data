@@ -1,4 +1,4 @@
-FROM postgres:11.3
+FROM postgres:11
 ENV POSTGRES_USER ref_admin
 ENV POSTGRES_PASSWORD ref_admin
 ENV POSTGRES_DB refdata

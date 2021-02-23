@@ -1,4 +1,4 @@
-image: $CI_REGISTRY/mouse-informatics/docker
+image: $CI_REGISTRY/mouse-informatics/docker:latest
 
 variables:
    # When using dind service we need to instruct docker, to talk with the
@@ -171,6 +171,9 @@ build_image:
         # - ls -lsh data
         - source ${MOUNT_POINT}/datetime.env
         - echo ${NOW}
+
+        - sed -i "s|FROM postgres|FROM ${LOCAL_GITLAB_POSTGRES_IMAGE}|g" Dockerfile
+
         - docker build -t reference-db .  | tee ${MOUNT_POINT}/build.log
         # - docker run --name refdb-container reference-db
         - docker run --name refdbcontainer -v "$MOUNT_POINT:/mnt" -d reference-db
