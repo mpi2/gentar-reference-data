@@ -109,13 +109,14 @@ psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "INSERT INTO hu
 select hd.id, ot.id from human_disease hd, omim_table ot, mgi_disease m, (select m2.id, unnest(string_to_array(m2.omim_acc_ids, '|')) from mgi_disease m2 where m2.omim_acc_ids is not null) mm where hd.do_acc_id = m.do_acc_id and m.id = mm.id and mm.unnest = ot.omim_acc_id group by hd.id, ot.id"
 
 
-psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "INSERT INTO human_gene_disease (human_gene_id, human_disease_id, human_evidence, mgi_gene_acc_id, mouse_evidence)
-(select a.gene_id,a.disease_id,True,mgi_gene_acc_id, True from (select h.id as \"gene_id\", hd.id as \"disease_id\" from human_gene h, hgnc_gene hg, mgi_disease m, human_disease hd where m.entrez_acc_id = hg.entrez_acc_id and hg.hgnc_acc_id = h.hgnc_acc_id and m.taxon_acc_id=9606 and m.do_acc_id = hd.do_acc_id) a INNER JOIN (select h.id as \"gene_id\", hd.id as \"disease_id\", m.mgi_gene_acc_id from human_gene h, mouse_gene mg, ortholog o, mgi_disease m, human_disease hd where m.mgi_gene_acc_id = mg.mgi_gene_acc_id and mg.id = o.mouse_gene_id and o.support_count > 4 and o.human_gene_id = h.id and m.taxon_acc_id=10090 and m.do_acc_id = hd.do_acc_id) b ON a.gene_id = b.gene_id and a.disease_id = b.disease_id)
- UNION 
-(select a.gene_id,a.disease_id,True,NULL as mgi_gene_acc_id, False from (select h.id as \"gene_id\", hd.id as \"disease_id\" from human_gene h, hgnc_gene hg, mgi_disease m, human_disease hd where m.entrez_acc_id = hg.entrez_acc_id and hg.hgnc_acc_id = h.hgnc_acc_id and m.taxon_acc_id=9606 and m.do_acc_id = hd.do_acc_id) a LEFT OUTER JOIN (select h.id as \"gene_id\", hd.id as \"disease_id\", m.mgi_gene_acc_id from human_gene h, mouse_gene mg, ortholog o, mgi_disease m, human_disease hd where m.mgi_gene_acc_id = mg.mgi_gene_acc_id and mg.id = o.mouse_gene_id and o.support_count > 4 and o.human_gene_id = h.id and m.taxon_acc_id=10090 and m.do_acc_id = hd.do_acc_id) b ON a.gene_id = b.gene_id and a.disease_id = b.disease_id WHERE b.gene_id IS NULL and b.disease_id IS NULL)
- UNION 
-(select b.gene_id,b.disease_id,False,mgi_gene_acc_id, True from (select h.id as \"gene_id\", hd.id as \"disease_id\" from human_gene h, hgnc_gene hg, mgi_disease m, human_disease hd where m.entrez_acc_id = hg.entrez_acc_id and hg.hgnc_acc_id = h.hgnc_acc_id and m.taxon_acc_id=9606 and m.do_acc_id = hd.do_acc_id) a RIGHT OUTER JOIN (select h.id as \"gene_id\", hd.id as \"disease_id\", m.mgi_gene_acc_id from human_gene h, mouse_gene mg, ortholog o, mgi_disease m, human_disease hd where m.mgi_gene_acc_id = mg.mgi_gene_acc_id and mg.id = o.mouse_gene_id and o.support_count > 4 and o.human_gene_id = h.id and m.taxon_acc_id=10090 and m.do_acc_id = hd.do_acc_id) b ON a.gene_id = b.gene_id and a.disease_id = b.disease_id WHERE a.gene_id IS NULL and a.disease_id IS NULL)"
-
+psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "WITH a AS (select h.id as \"gene_id\", hd.id as \"disease_id\" from human_gene h, hgnc_gene hg, mgi_disease m, human_disease hd where m.entrez_acc_id = hg.entrez_acc_id and hg.hgnc_acc_id = h.hgnc_acc_id and m.taxon_acc_id=9606 and m.do_acc_id = hd.do_acc_id),
+b AS (select h.id as \"gene_id\", hd.id as \"disease_id\", m.mgi_gene_acc_id from human_gene h, mouse_gene mg, ortholog o, mgi_disease m, human_disease hd where m.mgi_gene_acc_id = mg.mgi_gene_acc_id and mg.id = o.mouse_gene_id and o.support_count > 4 and o.human_gene_id = h.id and m.taxon_acc_id=10090 and m.do_acc_id = hd.do_acc_id)
+INSERT INTO human_gene_disease (human_gene_id, human_disease_id, human_evidence, mgi_gene_acc_id, mouse_evidence)
+(select a.gene_id,a.disease_id,True,mgi_gene_acc_id, True from a INNER JOIN b ON a.gene_id = b.gene_id and a.disease_id = b.disease_id)
+UNION 
+(select a.gene_id,a.disease_id,True,NULL as mgi_gene_acc_id, False from a LEFT OUTER JOIN b ON a.gene_id = b.gene_id and a.disease_id = b.disease_id WHERE b.gene_id IS NULL and b.disease_id IS NULL)
+UNION
+(select b.gene_id,b.disease_id,False,mgi_gene_acc_id, True from a RIGHT OUTER JOIN b ON a.gene_id = b.gene_id and a.disease_id = b.disease_id WHERE a.gene_id IS NULL and a.disease_id IS NULL)"
 
 
 printf 'end=%s\n' $(date +"%s") >> /usr/local/data/postgres_processing_time.sh
