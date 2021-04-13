@@ -193,7 +193,8 @@ build_image:
         - docker exec refdbcontainer sh -c "rm -r /usr/local/data"
 
         - echo "${CI_REGISTRY_IMAGE}":"${NOW}"
-
+        
+        - docker stop -t 120 refdbcontainer
         - docker commit refdbcontainer "${CI_REGISTRY_IMAGE}":"${NOW}"
         - docker push "${CI_REGISTRY_IMAGE}":"${NOW}"  | tee ${MOUNT_POINT}/push.log
         
