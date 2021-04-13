@@ -23,8 +23,11 @@ spec:
       labels:
         app: reference-database
     spec:
+      imagePullSecrets:
+      - name: refdataregistrycredentials
       containers:
-      - image: rwilsonebi/reference-data-db:latest
+      #- image: rwilsonebi/reference-data-db:latest      
+      - image: dockerhub.ebi.ac.uk/rwilson/reference_data:latest
         imagePullPolicy: Always
         name: reference-database-container
         livenessProbe:

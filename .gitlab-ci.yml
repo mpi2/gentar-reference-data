@@ -243,6 +243,13 @@ hh-test-deploy:
     - kubectl config use-context "${HH_KUBERNETES_TEST_NAMESPACE}"
     - kubectl version
     #
+    # Make sure the test environment is empty of all resources
+    # in case another test failed
+    - kubectl delete pod,deploy,rs,svc,ing --all  -n "${HH_KUBERNETES_TEST_NAMESPACE}"
+    # Wait
+    - sleep "${TEST_SETUP_PAUSE}"
+    
+    
     - kubectl apply -f kube/wp/test/database/refdata-database-deployment.yaml
     - kubectl rollout status -f kube/wp/test/database/refdata-database-deployment.yaml
     
