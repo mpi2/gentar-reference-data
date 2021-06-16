@@ -96,7 +96,7 @@ UNION select m2.id,aa2.id from mgi_phenotypic_allele p, mouse_gene m2, mouse_all
 
 # MGI_Disease_data_load.txt
 
-cat /mnt/MGI_DO.rpt | psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "\copy mgi_disease (do_acc_id,disease_name,omim_acc_ids,organism_name,taxon_acc_id,symbol,entrez_acc_id,mgi_gene_acc_id) FROM STDIN with (DELIMITER E'\t', NULL '', FORMAT CSV, header TRUE, ENCODING 'UTF8')"
+cat /mnt/MGI_DO.rpt | psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "\copy mgi_disease (do_acc_id,disease_name,omim_acc_ids,homologene_acc_id,organism_name,taxon_acc_id,symbol,entrez_acc_id,mgi_gene_acc_id) FROM STDIN with (DELIMITER E'\t', NULL '', FORMAT CSV, header TRUE, ENCODING 'UTF8')"
 
 
 psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "INSERT INTO human_disease (do_acc_id,name,mgi_disease_id)
