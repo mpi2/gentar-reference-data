@@ -115,7 +115,6 @@ CREATE TABLE public.mgi_disease (
     disease_name character varying(255),
     do_acc_id character varying(255),
     entrez_acc_id bigint,
-    homologene_acc_id bigint,
     mgi_gene_acc_id character varying(255),
     omim_acc_ids text,
     organism_name character varying(255),
