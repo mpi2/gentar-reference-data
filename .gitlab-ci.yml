@@ -37,6 +37,7 @@ variables:
    # Logged as: GitLab.com CI jobs failing if using docker:stable-dind image
    # see: https://gitlab.com/gitlab-com/gl-infra/production/issues/982
    DOCKER_TLS_CERTDIR: ""
+   SCAN_KUBERNETES_MANIFESTS: "true"
 
 
 # Use this command to look at your docker environment
@@ -45,11 +46,16 @@ variables:
 #before_script:
 #   - docker info
 
+include:
+  - template: Security/SAST.gitlab-ci.yml
+  - template: Security/Secret-Detection.gitlab-ci.yml
+
 
 stages:
    - download
    - mgi-formatting
    - build
+   - test
    - deploy-dev
    - production-deploy
    - production-test
@@ -149,33 +155,20 @@ build_image:
         - name: $CI_REGISTRY/mouse-informatics/dind:latest
           alias: docker
     before_script:
-    #    - apk add --update curl && rm -rf /var/cache/apk/*
-    #    - docker login -u "${CI_REGISTRY_USER}" -p "${CI_REGISTRY_PASSWORD}" ${CI_REGISTRY}
-        #- docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY
         - echo "${CI_REGISTRY_PASSWORD}" | docker login -u "${CI_REGISTRY_USER}" --password-stdin  ${CI_REGISTRY}
         - NOW=$(date '+%Y-%m-%d-%H-%M-%S')
         - echo "export NOW=${NOW}" > ${MOUNT_POINT}/datetime.env
     script:
-        # - mkdir -p data
-        # - export LAST_JOB_ID=$(cat "$MOUNT_POINT"/check_data_job_id.txt)
-        # - cd data
-        # THIS does not work - instead finish with download in the URL and add login credentials
-        # - curl -sSLN -O ${CI_PROJECT_URL}/-/jobs/${LAST_JOB_ID}/artifacts/download/artifacts.zip
-        # - unzip artifacts.zip
-        # - rm artifacts.zip
-        # - rm check_data_job_id.txt
-        # - cd "$CI_PROJECT_DIR"
-        # - ls -lsh data
-        # - exit
-        # - cp  data/
-        # - ls -lsh data
+
         - source ${MOUNT_POINT}/datetime.env
         - echo ${NOW}
+
+
+        # Build using a debian based container for Bash
 
         - sed -i "s|FROM postgres|FROM ${LOCAL_GITLAB_POSTGRES_IMAGE}|g" Dockerfile
 
         - docker build -t reference-db .  | tee ${MOUNT_POINT}/build.log
-        # - docker run --name refdb-container reference-db
         - docker run --name refdbcontainer -v "$MOUNT_POINT:/mnt" -d reference-db
 
         # Time is required to load the data
@@ -190,18 +183,32 @@ build_image:
         - sleep "${DB_LOAD_TIME}"
 
         - docker exec refdbcontainer sh /usr/local/data/postgres_processing_time.sh
+        - docker cp refdbcontainer:/usr/local/data/database.sql "$MOUNT_POINT"/database.sql
         - docker exec refdbcontainer sh -c "rm -r /usr/local/data"
+        - docker stop -t 120 refdbcontainer
+        
+
+        # Package for production using an alpine based container
+
+        - sed -i "s|FROM postgres|FROM ${LOCAL_GITLAB_POSTGRES_IMAGE}|g" Dockerfile-production
+        - docker build -t prod-reference-db -f Dockerfile-production .  | tee ${MOUNT_POINT}/build-production.log
+        - docker run --name prodrefdbcontainer -v "$MOUNT_POINT:/mnt" -d prod-reference-db
+        - sleep 30
 
         - echo "${CI_REGISTRY_IMAGE}":"${NOW}"
         
-        - docker stop -t 120 refdbcontainer
-        - docker commit refdbcontainer "${CI_REGISTRY_IMAGE}":"${NOW}"
-        - docker push "${CI_REGISTRY_IMAGE}":"${NOW}"  | tee ${MOUNT_POINT}/push.log
-        
+        - docker stop -t 120 prodrefdbcontainer
+        - docker commit prodrefdbcontainer "${CI_REGISTRY_IMAGE}":"${NOW}"
+
+        - rm "$MOUNT_POINT"/database.sql
+
+
         - docker tag "${CI_REGISTRY_IMAGE}":"${NOW}" "${CI_REGISTRY_IMAGE}":latest
+        - docker push "${CI_REGISTRY_IMAGE}":"${NOW}"  | tee ${MOUNT_POINT}/push.log
         - docker push "${CI_REGISTRY_IMAGE}":latest  | tee ${MOUNT_POINT}/push.log
 
         - docker logout ${CI_REGISTRY}
+
 
         # PUSH THE IMAGE TO DOCKERHUB
         - echo "${DOCKER_HUB_PWD}" | docker login -u "${DOCKER_HUB_USER}" --password-stdin
@@ -220,6 +227,76 @@ build_image:
         name: "database-${CI_JOB_ID}"
         paths:
             - ${MOUNT_POINT}
+    
+
+
+
+sast:
+  stage: test
+  script:
+    - echo "Running SAST scan ..."
+
+  artifacts:
+    reports:
+      container_scanning: gl-sast-report.json
+
+
+secret_detection:
+  stage: test
+  script:
+    - echo "Running secret detection scan ..."
+
+  artifacts:
+    reports:
+      container_scanning: gl-secret-detection-report.json
+
+
+
+trivy_container_scanning:
+  stage: test
+
+  services:
+    - name: $CI_REGISTRY/mouse-informatics/dind:latest
+      alias: docker
+  
+  rules:
+    - if: '$CI_BUILD_REF_NAME == "master"'
+      when: on_success
+      allow_failure: true
+  
+  before_script:
+    - export TRIVY_VERSION=$(wget -qO - "https://api.github.com/repos/aquasecurity/trivy/releases/latest" | grep '"tag_name":' | sed -E 's/.*"v([^"]+)".*/\1/')
+    - echo $TRIVY_VERSION
+    - wget --no-verbose https://github.com/aquasecurity/trivy/releases/download/v${TRIVY_VERSION}/trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz -O - | tar -zxvf -
+    - echo "${CI_REGISTRY_PASSWORD}" | docker login -u "${CI_REGISTRY_USER}" --password-stdin  ${CI_REGISTRY}
+    
+    - source ${MOUNT_POINT}/datetime.env
+    - echo ${NOW}
+
+  script:
+    # Build report
+    - ./trivy --exit-code 0 --cache-dir .trivycache/ --no-progress --format template --template "@contrib/gitlab.tpl" -o gl-container-scanning-report.json "${CI_REGISTRY_IMAGE}":"${NOW}"
+    # Print report
+    - ./trivy --exit-code 0 --cache-dir .trivycache/ --no-progress --severity HIGH "${CI_REGISTRY_IMAGE}":"${NOW}"
+    # Fail on critical vulnerability
+    - ./trivy --exit-code 1 --cache-dir .trivycache/ --severity CRITICAL --no-progress "${CI_REGISTRY_IMAGE}":"${NOW}"
+
+    - docker logout ${CI_REGISTRY}
+
+  cache:
+    paths:
+      - .trivycache/
+
+  artifacts:
+    reports:
+      container_scanning: gl-container-scanning-report.json
+
+
+
+
+    
+
+
 
 
 
