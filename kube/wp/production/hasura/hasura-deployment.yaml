@@ -41,6 +41,16 @@ spec:
           value: "5000"
         - name: HASURA_GRAPHQL_EVENTS_FETCH_INTERVAL
           value: "3000"
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 11010
+          runAsGroup: 11010
+          readOnlyRootFilesystem: true
+          privileged: false
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+               - all
         ports:
         - containerPort: 8080
           protocol: TCP
