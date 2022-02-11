@@ -10,7 +10,7 @@ services:
       refdata:
 
   hasura:
-    image: hasura/graphql-engine:v1.2.2
+    image: hasura/graphql-engine:v2.2.0
     restart: always
     environment:
       HASURA_GRAPHQL_DATABASE_URL: postgres://hasurauser:hasurauser@reference-database:5432/refdata
