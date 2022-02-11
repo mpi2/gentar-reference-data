@@ -20,8 +20,7 @@ spec:
       imagePullSecrets:
       - name: hasuraregistrycredentials
       containers:
-      #- image: hasura/graphql-engine:v1.2.2
-      - image: dockerhub.ebi.ac.uk/mouse-informatics/hasura:v1.2.2
+      - image: dockerhub.ebi.ac.uk/mouse-informatics/hasura:v2.2.0
         imagePullPolicy: IfNotPresent
         name: hasura
         env:
