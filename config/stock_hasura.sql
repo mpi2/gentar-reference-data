@@ -55,12 +55,17 @@ ALTER SCHEMA hdb_catalog OWNER TO hasurauser;
 -- Name: gen_hasura_uuid(); Type: FUNCTION; Schema: hdb_catalog; Owner: hasurauser
 --
 
+GRANT USAGE ON SCHEMA public to hasurauser;
+
 CREATE FUNCTION hdb_catalog.gen_hasura_uuid() RETURNS uuid
-    LANGUAGE sql
-    AS $$select gen_random_uuid()$$;
+    AS 'select public.gen_random_uuid()' LANGUAGE SQL STABLE;
+    
+ --   LANGUAGE sql
+ --   AS $$select gen_random_uuid()$$;
 
 
 ALTER FUNCTION hdb_catalog.gen_hasura_uuid() OWNER TO hasurauser;
+
 
 SET default_tablespace = '';
 
@@ -401,26 +406,25 @@ ALTER TABLE ONLY hdb_catalog.hdb_scheduled_event_invocation_logs
 -- Change the access to hdb_catalog tables
 -- 
 
-REVOKE ALL ON hdb_catalog.hdb_table FROM hasurauser;
-GRANT SELECT ON hdb_catalog.hdb_table TO hasurauser;
+REVOKE ALL ON hdb_catalog.hdb_version FROM hasurauser;
+GRANT SELECT ON hdb_catalog.hdb_version TO hasurauser;
 
 
-REVOKE ALL ON hdb_catalog.hdb_relationship FROM hasurauser;
-GRANT SELECT ON hdb_catalog.hdb_relationship TO hasurauser;
+REVOKE ALL ON hdb_catalog.hdb_schema_notifications FROM hasurauser;
+GRANT SELECT ON hdb_catalog.hdb_schema_notifications TO hasurauser;
 
 
-REVOKE ALL ON hdb_catalog.hdb_permission FROM hasurauser;
-GRANT SELECT ON hdb_catalog.hdb_permission TO hasurauser;
+REVOKE ALL ON hdb_catalog.hdb_scheduled_events FROM hasurauser;
+GRANT SELECT ON hdb_catalog.hdb_scheduled_events TO hasurauser;
 
 
-REVOKE ALL ON hdb_catalog.remote_schemas FROM hasurauser;
-GRANT SELECT ON hdb_catalog.remote_schemas TO hasurauser;
+REVOKE ALL ON hdb_catalog.hdb_metadata FROM hasurauser;
+GRANT SELECT ON hdb_catalog.hdb_metadata TO hasurauser;
 
 
-REVOKE ALL ON hdb_catalog.hdb_action FROM hasurauser;
-GRANT SELECT ON hdb_catalog.hdb_action TO hasurauser;
+REVOKE ALL ON hdb_catalog.hdb_cron_events FROM hasurauser;
+GRANT SELECT ON hdb_catalog.hdb_cron_events TO hasurauser;
 
-
-REVOKE ALL ON hdb_catalog.event_triggers FROM hasurauser;
-GRANT SELECT ON hdb_catalog.event_triggers TO hasurauser;
-
+-- hdb_catalog.hdb_scheduled_event_invocation_logs;
+--  hdb_catalog.hdb_cron_event_invocation_logs;
+-- hdb_catalog.hdb_action_log;
