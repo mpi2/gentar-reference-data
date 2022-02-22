@@ -422,8 +422,8 @@ REVOKE ALL ON hdb_catalog.hdb_metadata FROM hasurauser;
 GRANT SELECT ON hdb_catalog.hdb_metadata TO hasurauser;
 
 
-REVOKE ALL ON hdb_catalog.hdb_cron_events FROM hasurauser;
-GRANT SELECT ON hdb_catalog.hdb_cron_events TO hasurauser;
+-- REVOKE ALL ON hdb_catalog.hdb_cron_events FROM hasurauser;
+-- GRANT SELECT ON hdb_catalog.hdb_cron_events TO hasurauser;
 
 -- hdb_catalog.hdb_scheduled_event_invocation_logs;
 --  hdb_catalog.hdb_cron_event_invocation_logs;
