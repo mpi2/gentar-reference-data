@@ -137,8 +137,8 @@ MGI-formatting:
         - apk add --update wget build-base autoconf re2c libtool && mkdir -p /opt && cd /opt && wget http://ftp.gnu.org/pub/gnu/libiconv/libiconv-1.14.tar.gz && tar xzf libiconv-1.14.tar.gz && cd libiconv-1.14 && sed -i 's/_GL_WARN_ON_USE (gets, "gets is a security hole - use fgets instead");/#if HAVE_RAW_DECL_GETS\n_GL_WARN_ON_USE (gets, "gets is a security hole - use fgets instead");\n#endif/g' srclib/stdio.in.h && ./configure --prefix=/usr/local && make && make install && apk del wget build-base autoconf re2c libtool && rm /opt && rm -rf /var/cache/apk/* && rm -rf /usr/share/*
 
     script:
-        - iconv -f ISO-8859-1 -t UTF-8//TRANSLIT "$MOUNT_POINT"/MGI_PhenotypicAllele.rpt > "$MOUNT_POINT"/MGI_PhenotypicAllele.rpt.test.txt
-        - iconv -f ISO-8859-1 -t UTF-8//TRANSLIT "$MOUNT_POINT"/MGI_Strain.rpt > "$MOUNT_POINT"/MGI_Strain_test.rpt
+        - iconv -f ISO-8859-1//TRANSLIT -t UTF-8 "$MOUNT_POINT"/MGI_PhenotypicAllele.rpt > "$MOUNT_POINT"/MGI_PhenotypicAllele.rpt.test.txt
+        - iconv -f ISO-8859-1//TRANSLIT -t UTF-8 "$MOUNT_POINT"/MGI_Strain.rpt > "$MOUNT_POINT"/MGI_Strain_test.rpt
 
     dependencies:
         - MGI_data
@@ -275,11 +275,11 @@ trivy_container_scanning:
 
   script:
     # Build report
-    - ./trivy --exit-code 0 --cache-dir .trivycache/ --no-progress --format template --template "@contrib/gitlab.tpl" -o gl-container-scanning-report.json "${CI_REGISTRY_IMAGE}":"${NOW}"
+    - ./trivy image --exit-code 0 --cache-dir .trivycache/ --no-progress --format template --template "@contrib/gitlab.tpl" -o gl-container-scanning-report.json "${CI_REGISTRY_IMAGE}":"${NOW}"
     # Print report
-    - ./trivy --exit-code 0 --cache-dir .trivycache/ --no-progress --severity HIGH "${CI_REGISTRY_IMAGE}":"${NOW}"
+    - ./trivy image --exit-code 0 --cache-dir .trivycache/ --no-progress --severity HIGH "${CI_REGISTRY_IMAGE}":"${NOW}"
     # Fail on critical vulnerability
-    - ./trivy --exit-code 1 --cache-dir .trivycache/ --severity CRITICAL --no-progress "${CI_REGISTRY_IMAGE}":"${NOW}"
+    - ./trivy image --exit-code 1 --cache-dir .trivycache/ --severity CRITICAL --no-progress "${CI_REGISTRY_IMAGE}":"${NOW}"
 
     - docker logout ${CI_REGISTRY}
 
