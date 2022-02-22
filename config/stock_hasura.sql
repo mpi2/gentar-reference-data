@@ -414,8 +414,8 @@ REVOKE ALL ON hdb_catalog.hdb_schema_notifications FROM hasurauser;
 GRANT SELECT ON hdb_catalog.hdb_schema_notifications TO hasurauser;
 
 
-REVOKE ALL ON hdb_catalog.hdb_scheduled_events FROM hasurauser;
-GRANT SELECT ON hdb_catalog.hdb_scheduled_events TO hasurauser;
+-- REVOKE ALL ON hdb_catalog.hdb_scheduled_events FROM hasurauser;
+-- GRANT SELECT ON hdb_catalog.hdb_scheduled_events TO hasurauser;
 
 
 REVOKE ALL ON hdb_catalog.hdb_metadata FROM hasurauser;
