@@ -406,20 +406,20 @@ ALTER TABLE ONLY hdb_catalog.hdb_scheduled_event_invocation_logs
 -- Change the access to hdb_catalog tables
 -- 
 
-REVOKE ALL ON hdb_catalog.hdb_version FROM hasurauser;
-GRANT SELECT ON hdb_catalog.hdb_version TO hasurauser;
+-- REVOKE ALL ON hdb_catalog.hdb_version FROM hasurauser;
+-- GRANT SELECT ON hdb_catalog.hdb_version TO hasurauser;
 
 
-REVOKE ALL ON hdb_catalog.hdb_schema_notifications FROM hasurauser;
-GRANT SELECT ON hdb_catalog.hdb_schema_notifications TO hasurauser;
+-- REVOKE ALL ON hdb_catalog.hdb_schema_notifications FROM hasurauser;
+-- GRANT SELECT ON hdb_catalog.hdb_schema_notifications TO hasurauser;
 
 
 -- REVOKE ALL ON hdb_catalog.hdb_scheduled_events FROM hasurauser;
 -- GRANT SELECT ON hdb_catalog.hdb_scheduled_events TO hasurauser;
 
 
-REVOKE ALL ON hdb_catalog.hdb_metadata FROM hasurauser;
-GRANT SELECT ON hdb_catalog.hdb_metadata TO hasurauser;
+-- REVOKE ALL ON hdb_catalog.hdb_metadata FROM hasurauser;
+-- GRANT SELECT ON hdb_catalog.hdb_metadata TO hasurauser;
 
 
 -- REVOKE ALL ON hdb_catalog.hdb_cron_events FROM hasurauser;
