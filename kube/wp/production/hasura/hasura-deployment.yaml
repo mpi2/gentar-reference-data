@@ -31,9 +31,9 @@ spec:
         - name: HASURA_GRAPHQL_ENABLE_TELEMETRY
           value: "false"
         - name: HASURA_GRAPHQL_UNAUTHORIZED_ROLE
-          value: "anonymous"
-        # - name: HASURA_GRAPHQL_ADMIN_SECRET
-        #   value: "mpi2#3478"
+          value: "public"
+        - name: HASURA_GRAPHQL_ADMIN_SECRET
+          value: "mpi2!q23"
         - name: HASURA_GRAPHQL_ENABLED_APIS
           value: "graphql,metadata"
         - name: HASURA_GRAPHQL_LIVE_QUERIES_MULTIPLEXED_REFETCH_INTERVAL
