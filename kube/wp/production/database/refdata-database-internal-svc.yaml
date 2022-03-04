@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: internal-reference-database
+  namespace: mi-reference-data
+spec:
+  ports:
+  - nodePort: 32370
+    port: 5432
+    protocol: TCP
+  selector:
+    app: reference-database
+  type: NodePort
