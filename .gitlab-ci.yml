@@ -339,9 +339,13 @@ hh-test-deploy:
     
     
     - kubectl get pod,deployment,rs,svc,ing
-    
+     
     # Wait?
+    - sleep "${TEST_SETUP_PAUSE}"
+    
     # Run tests
+    - source "$CI_PROJECT_DIR"/scripts/service_test.sh -s="${HX_KUBERNETES_INTERNAL_ENDPOINT}/${HX_KUBERNETES_TEST_NAMESPACE}/v1/graphql" | tee ${MOUNT_POINT}/dev-test.log
+
     
     # Clean the test environment
     - kubectl delete -f kube/wp/test/hasura/hasura-ingress.yaml
@@ -399,12 +403,9 @@ hx-test-deploy:
     
     - kubectl get pod,deployment,rs,svc,ing
     
+   
     # Wait?
-    - sleep "${TEST_SETUP_PAUSE}"
-    
     # Run tests
-    - source "$CI_PROJECT_DIR"/scripts/service_test.sh -s="${HX_KUBERNETES_INTERNAL_ENDPOINT}/${HX_KUBERNETES_TEST_NAMESPACE}/v1/graphql" | tee ${MOUNT_POINT}/dev-test.log
-    
     
     # Clean the test environment
     - kubectl delete -f kube/wp/test/hasura/hasura-ingress.yaml
