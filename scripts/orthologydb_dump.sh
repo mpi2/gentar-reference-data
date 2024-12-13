@@ -2,7 +2,7 @@
 set -e
 
 ENDPOINT="http://$DATABASE_HOST:$HASURA_PORT/v1alpha1/pg_dump"
-EBI_PROXY="http://hx-wwwcache.ebi.ac.uk:3128"
+EBI_PROXY="http://hh-wwwcache.ebi.ac.uk:3128"
 
 error_exit()
 {
