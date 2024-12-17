@@ -344,10 +344,7 @@ hh-test-deploy:
     - sleep "${TEST_SETUP_PAUSE}"
     
     # Run tests
-    # No longer works http endpoint is not available
-    # - source "$CI_PROJECT_DIR"/scripts/service_test.sh -s="${HH_KUBERNETES_INTERNAL_ENDPOINT}/${HH_KUBERNETES_TEST_NAMESPACE}/v1/graphql" | tee ${MOUNT_POINT}/dev-test.log
-    # Revised version - test server at end of the loadbalancer
-    - source "$CI_PROJECT_DIR"/scripts/service_test.sh -d | tee ${MOUNT_POINT}/dev-test.log
+    - source "$CI_PROJECT_DIR"/scripts/service_test.sh -s="${HH_KUBERNETES_INTERNAL_ENDPOINT}/${HH_KUBERNETES_TEST_NAMESPACE}/v1/graphql" | tee ${MOUNT_POINT}/dev-test.log
 
     
     # Clean the test environment
