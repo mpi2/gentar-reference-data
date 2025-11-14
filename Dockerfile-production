@@ -1,7 +1,8 @@
 FROM postgres:18-alpine
 ENV POSTGRES_USER=ref_admin
+ENV POSTGRES_PASSWORD=ref_admin
 ENV POSTGRES_DB=refdata
 ENV PGDATA=/usr/local/data/postgresql/data/pgdata
 COPY load /docker-entrypoint-initdb.d/
-RUN --mount=type=secret,id=passwd,env=POSTGRES_PASSWORD mkdir -p /usr/local/data && chown -R postgres:postgres /usr/local/data
+RUN mkdir -p /usr/local/data && chown -R postgres:postgres /usr/local/data
 USER postgres
