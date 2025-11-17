@@ -167,7 +167,7 @@ build_image:
 
         - sed -i "s|FROM postgres|FROM ${LOCAL_GITLAB_POSTGRES_IMAGE}|g" Dockerfile
 
-        - docker build --secret id=passwd,env=$POSTGRES_PASSWORD -t reference-db .  | tee ${MOUNT_POINT}/build.log
+        - docker build -t reference-db .  | tee ${MOUNT_POINT}/build.log
         - docker run --name refdbcontainer -v "$MOUNT_POINT:/mnt" -d reference-db
 
         # Time is required to load the data
@@ -190,7 +190,7 @@ build_image:
         # Package for production using an alpine based container
 
         - sed -i "s|FROM postgres|FROM ${LOCAL_GITLAB_POSTGRES_IMAGE}|g" Dockerfile-production
-        - docker build --secret id=passwd,env=$POSTGRES_PASSWORD -t prod-reference-db -f Dockerfile-production .  | tee ${MOUNT_POINT}/build-production.log
+        - docker build -t prod-reference-db -f Dockerfile-production .  | tee ${MOUNT_POINT}/build-production.log
         - docker run --name prodrefdbcontainer -v "$MOUNT_POINT:/mnt" -d prod-reference-db
         - sleep 30
 
