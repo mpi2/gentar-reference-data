@@ -1,41 +1,17 @@
 #!/bin/bash
 set -e
 
-ENDPOINT="http://$DATABASE_HOST:$HASURA_PORT/v1alpha1/pg_dump"
-EBI_PROXY="http://hh-wwwcache.ebi.ac.uk:3128"
-
-error_exit()
-{
-    printf '%s\n' "$1" 1>&2;
-    exit 1;
-}
 
 set_schema_filename()
 {
 	OUTPUT='orthologydb_schema.sql'
 }
 
-set_schema_payload()
+set_schema_dump_options()
 {
-	PAYLOAD='{ "opts": ["-O", "-x", "--schema-only", "--schema", "public"],
-              "clean_output": true 
-            }'
-}
-
-set_table_data_payload()
-{
-    if [ "$#" -ne 1 ]; then
-        error_exit "Usage: set_table_data_payload table";
-    fi;
-
-    table="$1"
     
-	PAYLOAD='{ "opts": ["-O", "-x", "--encoding=UTF8", "--data-only", 
-	                    "--schema", "public", 
-	                    "--disable-triggers",  
-	                    "--table='"$table"'"],
-              "clean_output": true 
-            }'
+	DUMPOPTIONS='-O -x -c --if-exists --encoding=UTF8 --schema-only --schema public'
+	
 }
 
 set_table_dump_options()
@@ -61,21 +37,6 @@ set_table_filename()
 }
 
 
-fetch_data()
-{
-    if [ "$#" -ne 2 ]; then
-        error_exit "Usage: fetch_data request_payload output_file";
-    fi;
-
-    request_payload="$1"
-    output_file="$2"
-
-    curl "$ENDPOINT" -X POST -x "$EBI_PROXY" --data "$request_payload" \
-          -H "Content-Type: application/json" \
-          -H "X-Hasura-Role: admin" > "$output_file"
-}
-
-
 pg_dump_data()
 {
     if [ "$#" -ne 2 ]; then
@@ -96,8 +57,8 @@ dump_the_schema()
 {
 	printf 'schema:\n'
 	set_schema_filename
-	set_schema_payload
-	fetch_data "$PAYLOAD" "$OUTPUT"
+	set_schema_dump_options
+	pg_dump_data "$DUMPOPTIONS" "$OUTPUT"
 	printf '\n'
 }
 
