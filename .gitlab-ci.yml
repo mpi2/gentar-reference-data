@@ -109,7 +109,7 @@ MGI_data:
 
 
 orthology_db_dump:
-    image: $CI_REGISTRY/mouse-informatics/postgres:11-alpine
+    image: $CI_REGISTRY/mouse-informatics/postgres:18-alpine
     stage: download
     before_script:
         - apk add --update --no-cache curl

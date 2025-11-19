@@ -1,4 +1,4 @@
-FROM postgres:11
+FROM postgres:18
 ENV POSTGRES_USER=ref_admin
 ENV POSTGRES_PASSWORD=ref_admin
 ENV POSTGRES_DB=refdata
